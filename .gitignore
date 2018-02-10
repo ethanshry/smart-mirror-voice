@@ -99,3 +99,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# node_modules
+FrontEnd/node_modules

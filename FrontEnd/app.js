@@ -1,5 +1,10 @@
 var express = require('express');
 var app = express();
+var path = require('path');
+app.set("view engine", "pug");
+
+app.set("views", path.join(__dirname, "GUI"));
+
 var server = require('http').createServer(app);
 
 var bodyParser = require('body-parser')
@@ -38,7 +43,7 @@ client.connect('ws://localhost:2200/', 'echo-protocol');
 
 server.listen(3000, () => console.log('running on 3000'));
 
-
+/*
 var WebSocketServer = require('websocket').server;
 wsServer = new WebSocketServer({
 	httpServer: server,
@@ -62,10 +67,70 @@ wsServer.on('request', function(request) {
 		}
 	});
 });
-
+*/
 app.get('/', (req,res) => {
 	res.send('gogogo');
 });
+
+
+app.get('/PugDemo', (req, res) => {
+	const params = {
+		params: {
+			pageName: "Demo Page",
+			user: "tim",
+			storeItems: [
+				{
+					name: "fish",
+					cost: "4.99"
+				},
+				{
+					name: "walrus statue",
+					cost: "7.77"
+				},
+				{
+					name: "tiger plushie",
+					cost: "3.76"
+				},
+				{
+					name: "tomatoes",
+					cost: "4.99/lb"
+				}
+			]
+		}
+	}
+	res.render("pugDemo", params);
+});
+
+
+app.get('/KevinDemo', (req, res) => {
+	const params = {
+		params: {
+			pageName: "Kevin's Page",
+			numbers: [1,3,17,55,23,91],
+			isAuthenticated: 'true',
+			objects: [
+				{
+					name: "tim",
+					gender: "male"
+				},
+				{
+					name: "tina",
+					gender: "female"
+				},
+				{
+					name: "tommy",
+					gender: "male"
+				},
+				{
+					name: "trisha",
+					gender: "female"
+				}
+			]
+		}
+	}
+	res.render("kevinDemo", params);
+});
+
 
 app.post('/send', (req, res) => {
 	console.log(req.body);

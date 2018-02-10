@@ -2,10 +2,15 @@
   "name": "socket-test",
   "version": "1.0.0",
   "author": "ethanshry",
+  "scripts": {
+    "start": "node app.js"
+  },
   "dependencies": {
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "http": "0.0.0",
+    "path": "^0.12.7",
+    "pug": "^2.0.0-rc.4",
     "socket.io": "^2.0.4",
     "websocket": "^1.0.25"
   }

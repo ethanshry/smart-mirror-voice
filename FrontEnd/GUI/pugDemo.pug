@@ -1,0 +1,89 @@
+PugDemo 
+    //page name, just add it for clarity
+    //-
+        the object passed in to this page is as follows:
+        {
+            params: {
+                pageName: "Demo Page",
+                user: "tim",
+                storeItems: [
+                    {
+                        name: "fish",
+                        cost: "4.99"
+                    },
+                    {
+                        name: "walrus statue",
+                        cost: "7.77"
+                    },
+                    {
+                        name: "tiger plushie",
+                        cost: "3.76"
+                    },
+                    {
+                        name: "tomatoes",
+                        cost: "4.99/lb"
+                    }
+                ]
+            }
+        }
+
+    html
+        body
+            div.header Welcome to the Demo Page!
+            div.exampleClass This is an example of adding a css class to an element!
+            div#exampleId This is an example of adding an ID to an html element
+            ul.listExample
+                li item 1
+                li item 2
+                li item 3
+            div.button(onclick='runRandom()') click me!
+            div#buttonTarget
+            // now we'll have some fun, by accessing the params object you can get data from the server
+            div #{params.pageName}
+            // #{} breaks out of a string and lets you execute javascript commands, for instance
+            div a script has given you a random number of #{Math.floor(Math.random() * 6)}
+            // you can even do fun things with rendering
+            if params.user != "john"
+                div john is not the user
+            ul
+                each item in params.storeItems
+                    li #{item.name} : #{item.cost}
+
+    //example stylesheet
+    style.
+        body {
+            font-size: 1.3rem;
+        }
+        .header {
+            width: 100vw;
+            height: 10vh;
+            text-align: center;
+            font-size: 20px;
+        }
+        .exampleClass {
+            background-color: green;
+            color: blue;
+            margin: 20px;
+        }
+        #exampleId {
+            color: purple;
+        }
+        .button {
+            background-color: rgb(120, 240, 240);
+            transition: background-color 0.5s;
+            margin: 40px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: rgb(60, 240, 240);
+        }
+        #buttonTarget {
+            margin: 20px;
+            background-color: rgb(50, 30, 50);
+            color: white;
+        }
+    script.
+        runRandom = function() {
+            const buttonTarget = document.getElementById("buttonTarget");
+            buttonTarget.innerHTML = Math.floor(Math.random() * 7);
+        }

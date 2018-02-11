@@ -2,21 +2,23 @@ var express = require('express');
 var app = express();
 var path = require('path');
 var ws = require("nodejs-websocket")
-
-var voiceCommandLibrary = require('./voiceCommands');
-console.log(voiceCommandLibrary);
-
-app.set("view engine", "pug");
-
-app.set("views", path.join(__dirname, "GUI"));
-
+var bodyParser = require('body-parser')
 var server = require('http').createServer(app);
 
-var bodyParser = require('body-parser')
+var voiceCommandLibrary = require('./voiceCommands');
+var CommandParser = require('./commandParser');
+
+var CmdParser = CommandParser.initCommandParser(voiceCommandLibrary);
+
+
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "GUI"));
+
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 server.listen(3000, () => console.log('running on 3000'));
+
 
 var wsServer = ws.createServer(function (conn) {
 	console.log("New connection")
@@ -32,7 +34,6 @@ var wsServer = ws.createServer(function (conn) {
  }).listen(8080)
 
 function sendData(data) {
-	console.log(wsServer.connections);
 	wsServer.connections.forEach( (conn) => {
 		conn.send(data);
 	});
@@ -102,16 +103,7 @@ app.get('/KevinDemo', (req, res) => {
 });
 
 app.get('/nav/:command', (req, res) => {
-	console.log('getting param: ' + req.params.command);
-	switch(req.params.command) {
-		case "give me the weather":
-			res.render("weather");
-		default:
-			res.render("main");
-	}
-});
-
-
-app.post('/send', (req, res) => {
-	console.log(req.body);
+	let commandData = CmdParser.getCommandForString(req.params.command);
+	let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param);
+	res.render(voiceCommandLibrary.commands[commandData.commandIndex].viewName, paramData);
 });

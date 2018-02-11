@@ -3,6 +3,7 @@ import aiy.cloudspeech
 import asyncio
 import json
 import requests
+import time
 
 import RPi.GPIO as GPIO
 
@@ -16,7 +17,7 @@ config = {
 
 def main():
     GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(26, GPIO.OUT)
+    GPIO.setup(31, GPIO.OUT)
     global config
     recognizer = aiy.cloudspeech.get_recognizer()
     #recognizer.expect_phrase('turn off the light')
@@ -30,15 +31,13 @@ def main():
             print('Sorry, I did not hear you.')
         else:
             print('You said "', text, '"')
-            GPIO.output(26, GPIO.HIGH)
+            GPIO.output(31, GPIO.HIGH)
             if config['shouldSpeak']: aiy.audio.say("One moment")
             ws = create_connection("ws://localhost:8080/websocket")
             ws.send(text)
             ws.close()
-            GPIO.output(26, GPIOO.LOW)
+            time.sleep(1)
+            GPIO.output(31, GPIO.LOW)
 
 if __name__ == '__main__':
     main()
-
-
-

@@ -104,7 +104,7 @@ app.get('/KevinDemo', (req, res) => {
 app.get('/nav/:command', (req, res) => {
 	console.log('getting param: ' + req.params.command);
 	switch(req.params.command) {
-		case "weather":
+		case "give me the weather":
 			res.render("weather");
 		default:
 			res.render("main");

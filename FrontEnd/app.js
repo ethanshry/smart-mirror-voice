@@ -1,6 +1,11 @@
 var express = require('express');
 var app = express();
 var path = require('path');
+var ws = require("nodejs-websocket")
+
+var voiceCommandLibrary = require('./voiceCommands');
+console.log(voiceCommandLibrary);
+
 app.set("view engine", "pug");
 
 app.set("views", path.join(__dirname, "GUI"));
@@ -11,65 +16,30 @@ var bodyParser = require('body-parser')
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-// var io = require('socket.io').listen(server);
-
-//var WebSocketClient = require('websocket').client;
-//var client = new WebSocketClient();
-/*
-client.on('connectFailed', (error) => {
-	console.log('fail error: ' + error);
-});
-
-client.on('connection', (connection) => {
-	console.log('connected!');
-	client.on('error', (error) => {
-		console.log('error after connection: ' + error);
-	});
-	client.on('close', (error) => {
-		console.log('closing: ' + error);
-	});
-	client.on('message', (error) => {
-		console.log('msg: ' + error);
-	});
-});
-
-client.connect('ws://localhost:2200/', 'echo-protocol');
-*/
-
-
-
-
-
-
 server.listen(3000, () => console.log('running on 3000'));
 
-/*
-var WebSocketServer = require('websocket').server;
-wsServer = new WebSocketServer({
-	httpServer: server,
-	autoAcceptConnections: false
+var wsServer = ws.createServer(function (conn) {
+	console.log("New connection")
+	var sentData = "";
+	conn.on("text", function (str) {
+		console.log("Received "+str)
+		sentData = str;
+	})
+	conn.on("close", function (code, reason) {
+		console.log("Connection closed")
+		sendData(sentData)
+	})
+ }).listen(8080)
 
-
-});
-
-
-function originIsAllowed(origin) {
-	return true;
+function sendData(data) {
+	console.log(wsServer.connections);
+	wsServer.connections.forEach( (conn) => {
+		conn.send(data);
+	});
 }
 
-wsServer.on('request', function(request) {
-	var connection = request.accept('echo-protocol', request.origin);
-	console.log('Connection accepted');
-	connection.on('message', (message) => {
-		console.log(message);
-		if (message.type === 'utf8') {
-			console.log(message.utf8Data);
-		}
-	});
-});
-*/
 app.get('/', (req,res) => {
-	res.send('gogogo');
+	res.render("main");
 });
 
 
@@ -131,17 +101,17 @@ app.get('/KevinDemo', (req, res) => {
 	res.render("kevinDemo", params);
 });
 
+app.get('/nav/:command', (req, res) => {
+	console.log('getting param: ' + req.params.command);
+	switch(req.params.command) {
+		case "weather":
+			res.render("weather");
+		default:
+			res.render("main");
+	}
+});
+
 
 app.post('/send', (req, res) => {
 	console.log(req.body);
 });
-
-/*
-io.sockets.on('connection', function(socket) {
-	console.log('connecting to socket');
-	io.sockets.on('datasend', function(data) {
-		console.log(data);
-	});
-
-});
-*/

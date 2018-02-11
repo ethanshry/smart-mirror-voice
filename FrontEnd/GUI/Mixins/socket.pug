@@ -1,0 +1,8 @@
+mixin socketScript
+    script.
+        var connection = new WebSocket('ws://localhost:8080');
+
+        connection.onmessage = function(e) {
+            console.log("message!");
+            window.location = "http://localhost:3000/nav/" + e.data;
+        }

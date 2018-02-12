@@ -1,16 +1,16 @@
 // Imports
-var express = require('express');
-var app = express();
-var path = require('path');
-var ws = require("nodejs-websocket")
-var bodyParser = require('body-parser')
-var server = require('http').createServer(app);
+let express = require('express');
+let app = express();
+let path = require('path');
+let ws = require("nodejs-websocket")
+let bodyParser = require('body-parser')
+let server = require('http').createServer(app);
 
-var Config = require('./config');
-var voiceCommandLibrary = require('./voiceCommands');
-var CommandParser = require('./commandParser');
+let Config = require('./config');
+let voiceCommandLibrary = require('./voiceCommands');
+let CommandParser = require('./commandParser');
 
-var CmdParser = CommandParser.initCommandParser(voiceCommandLibrary);
+let CmdParser = CommandParser.initCommandParser(voiceCommandLibrary);
 
 // App Configuration
 app.set("view engine", "pug");
@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 server.listen(Config.guiServerPort, () => console.log('running on 3000'));
 
 // Configure the Websocket Server
-var wsServer = ws.createServer(function (conn) {
+let wsServer = ws.createServer(function (conn) {
 	console.log("New connection")
 	var sentData = "";
 	conn.on("text", function (str) {
@@ -114,6 +114,10 @@ app.get('/KevinDemo', (req, res) => {
 // main route for all voice commands
 app.get('/nav/:command', (req, res) => {
 	let commandData = CmdParser.getCommandForString(req.params.command);
-	let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param);
-	res.render(voiceCommandLibrary.commands[commandData.commandIndex].viewName, paramData);
+	if (commandData.commandIndex == -1) {
+		res.render("error");
+	} else {
+		let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param);
+		res.render(voiceCommandLibrary.commands[commandData.commandIndex].viewName, paramData);
+	}
 });

@@ -4,7 +4,7 @@ function CommandParser(commandList) {
 
 CommandParser.prototype.getCommandForString = function(str) {
     str = str.toLowerCase();
-    matchFlag = false;
+    let matchFlag = false;
     returnParams = {
         commandIndex: -1,
         param: undefined
@@ -31,6 +31,16 @@ CommandParser.prototype.getCommandForString = function(str) {
                     }
                 }
             })
+        }
+    });
+    this.commandList.commands.forEach((command, index) => {
+        if (!matchFlag) {
+            command.keywords.forEach((keyword) => {
+                if (str.indexOf(keyword) != -1) {
+                    matchFlag = true;
+                    returnParams.commandIndex = index;
+                }
+            });
         }
     });
     return returnParams;

@@ -1,75 +1,55 @@
-var express = require('express');
-var app = express();
-var path = require('path');
-app.set("view engine", "pug");
+// Imports
+let express = require('express');
+let app = express();
+let path = require('path');
+let ws = require("nodejs-websocket")
+let bodyParser = require('body-parser')
+let server = require('http').createServer(app);
 
+let Config = require('./config');
+let voiceCommandLibrary = require('./voiceCommands');
+let CommandParser = require('./commandParser');
+
+let CmdParser = CommandParser.initCommandParser(voiceCommandLibrary);
+
+// App Configuration
+app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "GUI"));
 
-var server = require('http').createServer(app);
-
-var bodyParser = require('body-parser')
+// Next two lines for abolity to grab Body from a POST request, possibly unneeded
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-// var io = require('socket.io').listen(server);
+// Start the GUI Server
+server.listen(Config.guiServerPort, () => console.log('running on 3000'));
 
-//var WebSocketClient = require('websocket').client;
-//var client = new WebSocketClient();
-/*
-client.on('connectFailed', (error) => {
-	console.log('fail error: ' + error);
-});
+// Configure the Websocket Server
+let wsServer = ws.createServer(function (conn) {
+	console.log("New connection")
+	var sentData = "";
+	conn.on("text", function (str) {
+		console.log("Received "+str)
+		sentData = str;
+	})
+	conn.on("close", function (code, reason) {
+		console.log("Connection closed")
+		// wait until python connection closes before sending the text input to the client
+		sendData(sentData)
+	})
+ }).listen(Config.websocketServerPort)
 
-client.on('connection', (connection) => {
-	console.log('connected!');
-	client.on('error', (error) => {
-		console.log('error after connection: ' + error);
+// Web Socket method, sends data to all server connections (currently used to bounce python speech input down to the client)
+function sendData(data) {
+	wsServer.connections.forEach((conn) => {
+		conn.send(data);
 	});
-	client.on('close', (error) => {
-		console.log('closing: ' + error);
-	});
-	client.on('message', (error) => {
-		console.log('msg: ' + error);
-	});
-});
-
-client.connect('ws://localhost:2200/', 'echo-protocol');
-*/
-
-
-
-
-
-
-server.listen(3000, () => console.log('running on 3000'));
-
-/*
-var WebSocketServer = require('websocket').server;
-wsServer = new WebSocketServer({
-	httpServer: server,
-	autoAcceptConnections: false
-
-
-});
-
-
-function originIsAllowed(origin) {
-	return true;
 }
 
-wsServer.on('request', function(request) {
-	var connection = request.accept('echo-protocol', request.origin);
-	console.log('Connection accepted');
-	connection.on('message', (message) => {
-		console.log(message);
-		if (message.type === 'utf8') {
-			console.log(message.utf8Data);
-		}
-	});
-});
-*/
+
+// Routes
+
 app.get('/', (req,res) => {
-	res.send('gogogo');
+	res.render("main");
 });
 
 
@@ -131,17 +111,13 @@ app.get('/KevinDemo', (req, res) => {
 	res.render("kevinDemo", params);
 });
 
-
-app.post('/send', (req, res) => {
-	console.log(req.body);
+// main route for all voice commands
+app.get('/nav/:command', (req, res) => {
+	let commandData = CmdParser.getCommandForString(req.params.command);
+	if (commandData.commandIndex == -1) {
+		res.render("error");
+	} else {
+		let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param);
+		res.render(voiceCommandLibrary.commands[commandData.commandIndex].viewName, paramData);
+	}
 });
-
-/*
-io.sockets.on('connection', function(socket) {
-	console.log('connecting to socket');
-	io.sockets.on('datasend', function(data) {
-		console.log(data);
-	});
-
-});
-*/

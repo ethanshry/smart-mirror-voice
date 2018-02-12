@@ -1,0 +1,8 @@
+mixin socketScript
+    // This mixin is used to add the websocket listener to a Pug page, it should be used on All GUIs we implement
+    script.
+        var connection = new WebSocket('ws://localhost:8080');
+
+        connection.onmessage = function(e) {
+            window.location = "http://localhost:3000/nav/" + e.data;
+        }

@@ -113,6 +113,7 @@ app.get('/KevinDemo', (req, res) => {
 
 // main route for all voice commands
 app.get('/nav/:command', (req, res) => {
+	// reqrite to pass cmd string and cmd param (optional)
 	let commandData = CmdParser.getCommandForString(req.params.command);
 	if (commandData.commandIndex == -1) {
 		res.render("error");

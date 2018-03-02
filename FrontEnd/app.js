@@ -6,6 +6,23 @@ let ws = require("nodejs-websocket")
 let bodyParser = require('body-parser')
 let server = require('http').createServer(app);
 
+let request = require('request');
+let twitterAPI = require('twitter');
+
+let cheerio = require('cheerio');
+const wikiQueries = ["lebron james", "watermellon", "fish", "pasta", "italy"];
+for (let item in wikiQueries) {
+	console.log("scraping wikipedia for information on '" + wikiQueries[item] + "'...");
+	const queryString = "https://en.wikipedia.org/wiki/" + wikiQueries[item].replace("/ /g ", "_");
+	request(queryString, (err, response, body) => {
+		//body = JSON.parse(body);
+		const $ = cheerio.load(body);
+		let text = $('.mw-parser-output>p').first().text();
+		console.log('\n\n\n')
+		console.log(text);
+	});
+}
+
 let Config = require('./config');
 let voiceCommandLibrary = require('./voiceCommands');
 let CommandParser = require('./commandParser');
@@ -121,4 +138,50 @@ app.get('/nav/:command', (req, res) => {
 		let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param);
 		res.render(voiceCommandLibrary.commands[commandData.commandIndex].viewName, paramData);
 	}
+});
+
+app.get('/api/:test', (req, res) => {
+	switch (req.params.test) {
+		case 'weather':
+			let requestString = Config.APIStrings.openweathermap.replace('%?%', Config.APIKeys.openweathermap);
+			console.log(requestString);
+			let responseData = {
+				"condition": null,
+				"temperature": null,
+				"humidity": null,
+				"wind": null,
+				"windDirection": null
+			};
+			request(requestString, (err, response, body) => {
+				body = JSON.parse(body);
+				responseData.condition = body.weather[0].main;
+				responseData.temperature = Math.round((9/5 * body.main.temp - 273.15) + 32);
+				responseData.humidity = body.main.humidity;
+				responseData.wind = body.wind.speed;
+				responseData.windDirection = "N";
+				console.log(responseData);
+			});
+			break;
+		case 'twitter':
+			let caller = new twitterAPI({
+				consumer_key: Config.APIKeys.twitter.consumerKey,
+				consumer_secret: Config.APIKeys.twitter.consumerSecret,
+				access_token_key: Config.APIKeys.twitter.accessToken,
+				access_token_secret: Config.APIKeys.twitter.accessTokenSecret
+			});
+			caller.get('search/tweets', {q: 'victory'}, (error, tweets, response) => {
+				tweets.statuses.forEach((tweet, index) => {
+					tweets.statuses[index] = {
+						text: tweet.text,
+						timestamp: tweet.created_at,
+						user: tweet.user
+					}
+				});
+				console.log(tweets);
+			})
+			break;
+		default:
+			break;
+	}
+	res.render('error');
 });

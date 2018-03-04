@@ -10,6 +10,9 @@ let request = require('request');
 let twitterAPI = require('twitter');
 
 let cheerio = require('cheerio');
+
+let fs = require('fs');
+
 const wikiQueries = ["lebron james", "watermellon", "fish", "pasta", "italy"];
 for (let item in wikiQueries) {
 	console.log("scraping wikipedia for information on '" + wikiQueries[item] + "'...");

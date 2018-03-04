@@ -9,6 +9,7 @@
     "body-parser": "^1.18.2",
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.16.2",
+    "fs": "0.0.1-security",
     "http": "0.0.0",
     "nodejs-websocket": "^1.7.1",
     "path": "^0.12.7",

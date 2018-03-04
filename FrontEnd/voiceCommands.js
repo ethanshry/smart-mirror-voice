@@ -1,3 +1,10 @@
+let request = require('request');
+let twitterAPI = require('twitter');
+
+let cheerio = require('cheerio');
+
+let fs = require('fs');
+
 module.exports = {
     // note- param character: %?%
     // whitelist characters (any filler): %$%
@@ -59,14 +66,23 @@ module.exports = {
         {
             name: "remember",
             cmdStrings: ["remember %?%", "remind me %?%"],
-            keywords: ["remind"],
+            keywords: [],
             trigger: (cmdString, param) => {
                 // STORE param in userData.json
-                return {
-                    params: {
-                        "text": "I will remember " + param
-                    }
-                };
+                fs.readFile('userData.json', (err, json) => {
+                    if (err) throw err;
+                    let content = JSON.parse(json);
+                    content.rememberedItems.push(param);
+                    fs.writeFile('userData.json', JSON.stringify(content), (err) => {
+                        if (err) throw err;
+                        return {
+                            params: {
+                                "text": "I will remember " + param
+                            }
+                        };
+                    });
+                });
+                
             },
             load: "textDisplay"
         },
@@ -122,23 +138,42 @@ module.exports = {
             keywords: [""],
             trigger: (cmdString, param) => {
                 // search through remembered items, delete if has match
-                return {
-                    params: {
-                        text: "Okay, I will forget\n" + param + "\nfor you"
+                fs.readFile('userData.json', (err, json) => {
+                    if (err) throw err;
+                    let content = JSON.parse(json);
+                    if (content.rememberedItems.indexOf(param) != -1) {
+                        content.rememberedItems = content.rememberedItems.splice(content.rememberedItems.indexOf(param), 1);
                     }
-                }
+                    fs.writeFile('userData.json', JSON.stringify(content), (err) => {
+                        if (err) throw err;
+                        return {
+                            params: {
+                                text: "Okay, I will forget\n" + param + "\nfor you"
+                            }
+                        }
+                    });
+                });
+                
             },
             load: "textDisplay"
         },
         //remind
         {
-            name: "",
-            cmdStrings: ["", ""],
-            keywords: [""],
+            name: "remind",
+            cmdStrings: ["%$% what have I forgotten", "remind me", "recall my reminders"],
+            keywords: ["remind", "remember", "forgotten"],
             trigger: (cmdString, param) => {
-                return 
+                fs.readFile('userData.json', (err, json) => {
+                    if (err) throw err;
+                    let content = JSON.parse(json);
+                    return {
+                        params: {
+                            "items": content.rememberedItems
+                        }
+                    };
+                });
             },
-            load: ""
+            load: "remind"
         },
         //time
         {
@@ -152,13 +187,13 @@ module.exports = {
         },
         //departure
         {
-            name: "",
-            cmdStrings: ["", ""],
-            keywords: [""],
+            name: "departure",
+            cmdStrings: ["turn off", "goodbye", "bye %$%"],
+            keywords: ["bye", "off", "shutdown"],
             trigger: (cmdString, param) => {
                 return 
             },
-            load: ""
+            load: "empty"
         },
         //compliment
         {

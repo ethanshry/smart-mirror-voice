@@ -9,22 +9,7 @@ let server = require('http').createServer(app);
 let request = require('request');
 let twitterAPI = require('twitter');
 
-let cheerio = require('cheerio');
-
 let fs = require('fs');
-
-const wikiQueries = ["lebron james", "watermellon", "fish", "pasta", "italy"];
-for (let item in wikiQueries) {
-	console.log("scraping wikipedia for information on '" + wikiQueries[item] + "'...");
-	const queryString = "https://en.wikipedia.org/wiki/" + wikiQueries[item].replace("/ /g ", "_");
-	request(queryString, (err, response, body) => {
-		//body = JSON.parse(body);
-		const $ = cheerio.load(body);
-		let text = $('.mw-parser-output>p').first().text();
-		console.log('\n\n\n')
-		console.log(text);
-	});
-}
 
 let Config = require('./config');
 let voiceCommandLibrary = require('./voiceCommands');
@@ -66,69 +51,10 @@ function sendData(data) {
 }
 
 
-// Routes
+// ### Routes ###
 
 app.get('/', (req,res) => {
 	res.render("main");
-});
-
-
-app.get('/PugDemo', (req, res) => {
-	const params = {
-		params: {
-			pageName: "Demo Page",
-			user: "tim",
-			storeItems: [
-				{
-					name: "fish",
-					cost: "4.99"
-				},
-				{
-					name: "walrus statue",
-					cost: "7.77"
-				},
-				{
-					name: "tiger plushie",
-					cost: "3.76"
-				},
-				{
-					name: "tomatoes",
-					cost: "4.99/lb"
-				}
-			]
-		}
-	}
-	res.render("pugDemo", params);
-});
-
-
-app.get('/KevinDemo', (req, res) => {
-	const params = {
-		params: {
-			pageName: "Kevin's Page",
-			numbers: [1,3,17,55,23,91],
-			isAuthenticated: 'true',
-			objects: [
-				{
-					name: "tim",
-					gender: "male"
-				},
-				{
-					name: "tina",
-					gender: "female"
-				},
-				{
-					name: "tommy",
-					gender: "male"
-				},
-				{
-					name: "trisha",
-					gender: "female"
-				}
-			]
-		}
-	}
-	res.render("kevinDemo", params);
 });
 
 // main route for all voice commands
@@ -183,6 +109,10 @@ app.get('/api/:test', (req, res) => {
 				console.log(tweets);
 			})
 			break;
+		
+		case 'wsTest':
+			sendData('message recieved');
+		
 		default:
 			break;
 	}

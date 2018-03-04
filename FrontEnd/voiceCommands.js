@@ -225,15 +225,25 @@ module.exports = {
             },
             load: ""
         },
-        //wiki webcrawler??
+        //wiki webcrawler
         {
-            name: "",
-            cmdStrings: ["", ""],
-            keywords: [""],
+            name: "wikipedia",
+            cmdStrings: ["who is %?%", "what is %?%", "where is %?%", "wiki search %?%"],
+            keywords: [],
             trigger: (cmdString, param) => {
-                return 
+                const queryString = "https://en.wikipedia.org/wiki/" + param.replace("/ /g ", "_");
+                request(queryString, (err, response, body) => {
+                    const $ = cheerio.load(body);
+                    let text = $('.mw-parser-output>p').first().text();
+                    return {
+                        params: {
+                            text: text,
+                            source: "wikipedia.org"
+                        }
+                    }
+                }); 
             },
-            load: ""
+            load: "textDisplay"
         }
     ]
 };

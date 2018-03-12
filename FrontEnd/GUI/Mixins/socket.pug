@@ -8,7 +8,7 @@ mixin socketScript
             const br = data.indexOf('~.~');
             const terminate = data.indexOf('~_~');
             let dtaA = data.substring(init + 3, br);
-            let dtaB = data.substring(break + 3, terminate);
+            let dtaB = data.substring(br + 3, terminate);
             return {
                 command: dtaA,
                 destination: dtaB

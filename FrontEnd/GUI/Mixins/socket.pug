@@ -3,6 +3,21 @@ mixin socketScript
     script.
         var connection = new WebSocket('ws://localhost:8080');
 
+        function processIncoming(data) {
+            const init = data.indexOf('~-~');
+            const break = data.indexOf('~.~');
+            const terminate = data.indexOf('~_~');
+            let dtaA = data.substring(init + 3, break);
+            let dtaB = data.substring(break + 3, terminate);
+            return {
+                command: dtaA,
+                destination: dtaB
+            }
+        }
+
         connection.onmessage = function(e) {
-            window.location = "http://localhost:3000/nav/" + e.data;
+            var recvData = processIncoming(e.data);
+            if (recvData.command == 'pageSelectRequest') {
+                window.location = "http://localhost:3000/nav/" + recvData.destination;
+            }
         }

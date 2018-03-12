@@ -25,21 +25,41 @@ app.set("views", path.join(__dirname, "GUI"));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+// global content store
+const globalData = {
+	audioAwaitingOutput: ""
+};
+
 // Start the GUI Server
 server.listen(Config.guiServerPort, () => console.log('running on 3000'));
 
 // Configure the Websocket Server
 let wsServer = ws.createServer(function (conn) {
 	console.log("New connection")
-	var sentData = "";
+	// var sentData = "";
 	conn.on("text", function (str) {
 		console.log("Received "+str)
-		sentData = str;
+		// sentData = str;
+		const newData = processRecievedWebsocketData(sentData);
+		if (newData.cmd == 'audiooutrequest') {
+			// audiooutrequest should return an audiooutresponse
+			if (globalData.audioAwaitingOutput != "") {
+				sendData(formatOutgoingWebsocketData('audiooutresponse', globalData.audioAwaitingOutput));
+				globalData.audioAwaitingOutput = "";
+			} else {
+				sendData(formatOutgoingWebsocketData('audiooutresponse', 'noresponse'));
+			}
+		} else if (newData.cmd == 'clientpassthrough') {
+			// client only expects page requests, clientpassthrough should return pageselectrequest
+			sendData(formatOutgoingWebsocketData('pageselectrequest', newData.packet));
+		} else if (newData.cmd == 'lightrequest') {
+			// ###TODO: Complete arduino integration
+		}
 	})
 	conn.on("close", function (code, reason) {
 		console.log("Connection closed")
 		// wait until python connection closes before sending the text input to the client
-		sendData(sentData)
+		//sendData(sentData);
 	})
  }).listen(Config.websocketServerPort)
 
@@ -49,6 +69,28 @@ function sendData(data) {
 		conn.send(data);
 	});
 }
+
+function processRecievedWebsocketData(data) {
+	
+	const startSeqIndex = data.indexOf('~-~');
+	const endSeqIndex = data.indexOf('~.~');
+	const termSeqIndex = data.indexOf('~_~');
+	let cmd = data.substring(startSeqIndex + 3, endSeqIndex);
+	let packet = data.substring(endSeqIndex + 3, termSeqIndex);
+	return {
+		cmd: cmd,
+		packet: packet
+	}
+}
+
+function formatOutgoingWebsocketData(cmd, packet) {
+	return "~-~" + cmd + "~.~" + packet + "~_~";
+}
+/*
+function sendHardwareInterfaceMessage(message) {
+	const conn = ws.connect('ws://localhost:9393');
+	conn.send(message);
+}*/
 
 
 // ### Routes ###
@@ -70,6 +112,7 @@ app.get('/nav/:command', (req, res) => {
 });
 
 app.get('/api/:test', (req, res) => {
+	console.log(req.params.test);
 	switch (req.params.test) {
 		case 'weather':
 			let requestString = Config.APIStrings.openweathermap.replace('%?%', Config.APIKeys.openweathermap);
@@ -107,12 +150,8 @@ app.get('/api/:test', (req, res) => {
 					}
 				});
 				console.log(tweets);
-			})
+			});
 			break;
-		
-		case 'wsTest':
-			sendData('message recieved');
-		
 		default:
 			break;
 	}

@@ -1,3 +1,5 @@
+
+# pylint: disable=E0401
 import aiy.audio
 import aiy.cloudspeech
 import asyncio
@@ -5,7 +7,7 @@ import json
 import requests
 import time
 
-import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO 
 
 
 from websocket import create_connection
@@ -14,6 +16,9 @@ config = {
     "shouldSpeak": False,
     "shouldTriggerVisualIndicator": False
 }
+
+def formatOutgoingWsMsg(command, packet):
+    return "~-~" + command + "~.~" + packet + "~_~"
 
 def main():
     GPIO.setmode(GPIO.BOARD)
@@ -34,7 +39,7 @@ def main():
             GPIO.output(31, GPIO.HIGH)
             if config['shouldSpeak']: aiy.audio.say("One moment")
             ws = create_connection("ws://localhost:8080/websocket")
-            ws.send(text)
+            ws.send(formatOutgoingWsMsg("clientpassthrough",text))
             ws.close()
             time.sleep(1)
             GPIO.output(31, GPIO.LOW)

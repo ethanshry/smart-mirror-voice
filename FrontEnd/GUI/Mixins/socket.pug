@@ -5,9 +5,9 @@ mixin socketScript
 
         function processIncoming(data) {
             const init = data.indexOf('~-~');
-            const break = data.indexOf('~.~');
+            const br = data.indexOf('~.~');
             const terminate = data.indexOf('~_~');
-            let dtaA = data.substring(init + 3, break);
+            let dtaA = data.substring(init + 3, br);
             let dtaB = data.substring(break + 3, terminate);
             return {
                 command: dtaA,

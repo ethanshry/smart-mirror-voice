@@ -40,7 +40,7 @@ let wsServer = ws.createServer(function (conn) {
 	conn.on("text", function (str) {
 		console.log("Received "+str)
 		// sentData = str;
-		const newData = processRecievedWebsocketData(sentData);
+		const newData = processRecievedWebsocketData(str);
 		if (newData.cmd == 'audiooutrequest') {
 			// audiooutrequest should return an audiooutresponse
 			if (globalData.audioAwaitingOutput != "") {
@@ -100,15 +100,19 @@ app.get('/', (req,res) => {
 });
 
 // main route for all voice commands
-app.get('/nav/:command', (req, res) => {
+app.get('/nav/:cmd', (req, res) => {
 	// reqrite to pass cmd string and cmd param (optional)
-	let commandData = CmdParser.getCommandForString(req.params.command);
+	console.log(req.params.cmd);
+	/*
+	TODO: repair command selection
+	let commandData = CmdParser.getCommandForString(req.params.cmd);
 	if (commandData.commandIndex == -1) {
 		res.render("error");
 	} else {
 		let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param);
 		res.render(voiceCommandLibrary.commands[commandData.commandIndex].viewName, paramData);
-	}
+	}*/
+	res.render('error');
 });
 
 app.get('/api/:test', (req, res) => {

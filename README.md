@@ -48,3 +48,16 @@ Navigate to `https://localhost:3000/KevinDemo` to see the your playground page u
 I am also passing you some data so you can see how dealing with data from the server works in Pug. I've left the format of the data commented out at the top of your pug file.
 
 Good Luck! Let me know if you have any questions~
+
+## TODO:
+* Callback on hotword for lights --stretch
+* hotword custom config --stretch
+* shorter hotword detection longer sentence detection --stretch
+* API integrations (the lot)
+* smoother TTCommand parsing
+* all the commands and whatnot
+* JS -> python comm
+* Local file storage
+* GUIs
+* monitor to kiosk mode on startup --stretch
+* monitor vertical

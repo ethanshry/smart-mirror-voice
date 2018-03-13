@@ -1,50 +1,48 @@
+
+# pylint: disable=E0401
 import aiy.audio
 import aiy.cloudspeech
 import asyncio
 import json
-import websockets
 import requests
+import time
 
-#from websocket import create_connection
+import RPi.GPIO as GPIO 
 
-async def sendData(uri, data):
-    print('preparing transmission')
-    async with websockets.connect(uri) as websocket:
-        print('transmitting')
-        await websocket.send(json.dumps(data))
+
+from websocket import create_connection
+
+config = {
+    "shouldSpeak": False,
+    "shouldTriggerVisualIndicator": False
+}
+
+def formatOutgoingWsMsg(command, packet):
+    return "~-~" + command + "~.~" + packet + "~_~"
 
 def main():
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(31, GPIO.OUT)
+    global config
     recognizer = aiy.cloudspeech.get_recognizer()
     #recognizer.expect_phrase('turn off the light')
-    recognizer.expect_hotword('mirror mirror on the wall')
-    #button = aiy.voicehat.get_button()
-    #led = aiy.voicehat.get_led()
+    recognizer.expect_hotword('Clara')
     aiy.audio.get_recorder().start()
 
     while True:
-        #print('Press the button and speak')
-        #button.wait_for_press()
         print('Listening...')
         text = recognizer.recognize()
         if not text:
             print('Sorry, I did not hear you.')
         else:
             print('You said "', text, '"')
-            #asyncio.get_event_loop().run_until_complete(
-            #    sendData("ws://localhost:3000", {"message": text})
-            #)
-            r = requests.post('http://localhost:3000/send/', data = {'msg': text})
-            #ws = create_connection("ws://localhost:3000/")
-            #ws.send(json.dumps({"datasend": "text"}))
-            #result = ws.recv()
-            #print(result)
-            #time.sleep(1)
-            #ws.close()
-            
-            #ws = yield from websockets.connect("ws://localhost:3000");
-            #ws.send({"datasend":text})
+            GPIO.output(31, GPIO.HIGH)
+            if config['shouldSpeak']: aiy.audio.say("One moment")
+            ws = create_connection("ws://localhost:8080/websocket")
+            ws.send(formatOutgoingWsMsg("clientpassthrough",text))
+            ws.close()
+            time.sleep(1)
+            GPIO.output(31, GPIO.LOW)
 
 if __name__ == '__main__':
     main()
-
-

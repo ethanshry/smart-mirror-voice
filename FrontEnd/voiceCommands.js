@@ -5,6 +5,8 @@ let cheerio = require('cheerio');
 
 let fs = require('fs');
 
+let config = require('./config');
+
 module.exports = {
     // note- param character: %?%
     // whitelist characters (any filler): %$%
@@ -253,13 +255,42 @@ module.exports = {
         },
         //stock???
         {
-            name: "",
-            cmdStrings: [],
-            keywords: [],
+            name: "stock",
+            cmdStrings: ["show me my stock overview"],
+            keywords: ["stock"],
             trigger: (param) => {
-                return 
+                let res = request('GET', config.APIStrings.alphavantage + config.APIKeys.alphavantage);
+                const data = JSON.parse(res.getBody());
+                let viewData = {
+                    title: data["Meta Data"]["2. Symbol"],
+                    data: [],
+                    labels: []
+                };
+                let hasChange = false;
+                for (let key in data["Time Series (Daily)"]) {
+                    if (hasChange == false) {
+                        let change = Number(data["Time Series (Daily)"][key]["4. close"]) - Number(data["Time Series (Daily)"][key]["1. open"]);
+                        if (change >= 0) {
+                            viewData.title += " \u25B2 " + Math.round(change * 100) / 100;
+                        } else {
+                            viewData.title += " \u25BC " + Math.round(Math.abs(change) * 100) / 100;
+                        }
+                        hasChange = true;
+                    }
+                    let item = {
+                        x: Date.parse(key),
+                        y: Number(data["Time Series (Daily)"][key]["4. close"])
+                    };
+                    viewData.data.push(item);
+                    viewData.labels.push(key);
+                }
+                return {
+                    params: {
+                        stockData: viewData
+                    }
+                }
             },
-            viewName: ""
+            viewName: "stock"
         },
         //lamp
         {

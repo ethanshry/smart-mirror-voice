@@ -1,7 +1,45 @@
 # smart-mirror-voice
 GUI Driver for a smart mirror powered through voice commands
 
-## Launching the Server
+# Project Tour
+Three main parts:
+
+## /testCode
+Contains utility files to test various pieces of the project flow
+
+## /HardwareInterface
+Contains the python Speech to Text Server
+
+## /FrontEnd
+Contains the NodeJS server which handles most everything else
+`/GUI` contains all the Pug view templates
+
+`app.js` is the main server code- handles interaction between Python, Client, Arduino, View Routing, Command Parser, Local file Storage, etc
+
+`commandParser.js` handles conversion from the raw speech text to a command outlines in `voiceCommands.js`
+
+`voiceCommands.js` contains all the commands and their related options- from which text activates them to the view to bring up when they are activated and the trigger to use to find appropriate data to associate with the command
+
+`config.js` contains general application level configurations like server ports and API keys
+
+`userData.json` contains user-level data like account keys, style configs, and reminder information
+
+# Launching the Application
+Launching the application is annoying and tedious, yay. Hopefully we will have this automated on an actual Pi.
+
+First we want to download the repo to a **raspberry pi** set up using the **Google AIY** distro of raspbian, which can be found [here](https://aiyprojects.withgoogle.com/voice).
+
+Then you'll need to to a ton of Google Cloud configurations, will update that when we are 100% clear on the process. The most important thing is getting an **OAuth Json** file and ensuring it is in the correct folder (which is at the root of the AIY python virtual env, again will update with more specific instructions in the future).
+
+Clone the repo onto your Pi, anywhere will do
+
+Now you'll need to copy `voiceRecognizer.py` from `./HardwareInterface/voiceRecognizer.py` to somewhere in the AIY virtual env. Will update to be more specific, but has to end up in the `examples` folder. It's something like `src/voice/examples`. 
+
+Now, start the nodejs server using `npm start` from the desktop. Then use the **AIY VirtualEnv** terminal to launch `voiceRecognizer.py` from the location we copied it into previously. Finally, open up a browser and navigate to `localhost:3000/nav/main`, or whatever port is specified in `./FrontEnd/config.js`
+
+From that point, the application should be running smoothly!
+
+# Launching the Server
 
 If you know nothing about nodejs, this will get you started.
 
@@ -27,7 +65,7 @@ npm run start
 That's it! The nodejs server is up and running.
 *** NOTE: You *MUST* restart the server any time you make a change to the code for the changes to update. Simply `Ctrl+C` in the terminal and `npm start` to restart ***
 
-## Kevin & Pug
+# Kevin & Pug
 Kevin, the folder you'll be dealing with will be FrontEnd/GUI
 
 Each command should have its own **filename.pug** file
@@ -49,15 +87,15 @@ I am also passing you some data so you can see how dealing with data from the se
 
 Good Luck! Let me know if you have any questions~
 
-## TODO:
-* Callback on hotword for lights --stretch
-* hotword custom config --stretch
-* shorter hotword detection longer sentence detection --stretch
+# TODO:
+* Callback on hotword for lights --complete
+* hotword custom config --in progress
+* shorter hotword detection longer sentence detection --tabled
 * API integrations (the lot)
-* smoother TTCommand parsing
+* smoother TTCommand parsing --complete
 * all the commands and whatnot
-* JS -> python comm
+* JS -> python comm --complete
 * Local file storage
 * GUIs
-* monitor to kiosk mode on startup --stretch
+* monitor to kiosk mode on startup --in progress
 * monitor vertical

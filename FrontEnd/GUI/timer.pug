@@ -2,11 +2,22 @@ Timer
     include Mixins/socket.pug
     html
         body
+            div#timerView Timing for #{params.duration} seconds
             
     style.
         body {
-            font-size: 1.3rem;
+            font-size: 3rem;
+            background-color: black;
+            color: white;
+            width: 100vw;
+            height: 100vh;
+            text-align: center;
         }
+
+        #timerView {
+            margin: 50vh auto;
+        }
+
         .header {
             width: 100vw;
             height: 10vh;
@@ -14,3 +25,15 @@ Timer
             font-size: 20px;
         }
     +socketScript()
+
+    script.
+        let timeDuration = parseInt("#{params.duration}");
+        setInterval(() => {
+            timeDuration -= 1;
+            if (timeDuration > 0) {
+                document.getElementById("timerView").innerHTML = "Timing for\n" + timeDuration + "\nseconds";
+            } else {
+                document.getElementById("timerView").innerHTML = "Time's Up!"
+            }
+        }, 1000);
+

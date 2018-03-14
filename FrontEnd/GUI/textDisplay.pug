@@ -2,11 +2,22 @@ TextDisplay
     include Mixins/socket.pug
     html
         body
+            div #{params.text} 
             
     style.
         body {
-            font-size: 1.3rem;
+            font-size: 3rem;
+            background-color: black;
+            color: white;
+            width: 100vw;
+            height: 100vh;
+            text-align: center;
         }
+
+        div {
+            margin: 50vh auto;
+        }
+
         .header {
             width: 100vw;
             height: 10vh;
@@ -14,3 +25,4 @@ TextDisplay
             font-size: 20px;
         }
     +socketScript()
+

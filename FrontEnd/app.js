@@ -19,7 +19,7 @@ let CmdParser = CommandParser.initCommandParser(voiceCommandLibrary);
 
 // App Configuration
 app.set("view engine", "pug");
-app.set("views", path.join(__dirname, "GUI"));
+app.set("views", path.resolve(__dirname,'GUI'));
 
 // Next two lines for abolity to grab Body from a POST request, possibly unneeded
 app.use(bodyParser.urlencoded({extended: false}));
@@ -61,6 +61,11 @@ let wsServer = ws.createServer(function (conn) {
 		// wait until python connection closes before sending the text input to the client
 		//sendData(sentData);
 	})
+	conn.on("error", function (err) {
+		// MUST INCLUDE so that the socket server doesnt crash all the time
+		// see https://github.com/websockets/ws/issues/1256 for details
+		console.log('erroring out');
+	})
  }).listen(Config.websocketServerPort)
 
 // Web Socket method, sends data to all server connections (currently used to bounce python speech input down to the client)
@@ -71,7 +76,6 @@ function sendData(data) {
 }
 
 function processRecievedWebsocketData(data) {
-	
 	const startSeqIndex = data.indexOf('~-~');
 	const endSeqIndex = data.indexOf('~.~');
 	const termSeqIndex = data.indexOf('~_~');
@@ -86,12 +90,6 @@ function processRecievedWebsocketData(data) {
 function formatOutgoingWebsocketData(cmd, packet) {
 	return "~-~" + cmd + "~.~" + packet + "~_~";
 }
-/*
-function sendHardwareInterfaceMessage(message) {
-	const conn = ws.connect('ws://localhost:9393');
-	conn.send(message);
-}*/
-
 
 // ### Routes ###
 
@@ -101,18 +99,19 @@ app.get('/', (req,res) => {
 
 // main route for all voice commands
 app.get('/nav/:cmd', (req, res) => {
+	console.log('naving');
 	// reqrite to pass cmd string and cmd param (optional)
 	console.log(req.params.cmd);
-	/*
-	TODO: repair command selection
-	let commandData = CmdParser.getCommandForString(req.params.cmd);
+	const commandData = CmdParser.getCommandForString(req.params.cmd);
+	console.log(commandData);
 	if (commandData.commandIndex == -1) {
 		res.render("error");
 	} else {
 		let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param);
+		console.log(paramData);
 		res.render(voiceCommandLibrary.commands[commandData.commandIndex].viewName, paramData);
-	}*/
-	res.render('error');
+	}
+	//res.render('error');
 });
 
 app.get('/api/:test', (req, res) => {

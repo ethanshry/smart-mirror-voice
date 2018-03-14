@@ -16,8 +16,11 @@ mixin socketScript
         }
 
         connection.onmessage = function(e) {
+            console.log(e.data);
             var recvData = processIncoming(e.data);
-            if (recvData.command == 'pageSelectRequest') {
+            console.log(recvData);
+            console.log(recvData.destination);
+            if (recvData.command == 'pageselectrequest') {
                 window.location = "http://localhost:3000/nav/" + recvData.destination;
             }
         }

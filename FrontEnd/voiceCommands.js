@@ -1,4 +1,4 @@
-let request = require('request');
+let request = require('sync-request');
 let twitterAPI = require('twitter');
 
 let cheerio = require('cheerio');
@@ -8,6 +8,31 @@ let fs = require('fs');
 module.exports = {
     // note- param character: %?%
     // whitelist characters (any filler): %$%
+    /*
+    command template
+    {
+            name: "descriptive name, only for coder use",
+            cmdStrings: ["list of strings. Can make use of %?% for parameter, %#% for continuous whitelist character sequence. Max 1 of each per command"],
+            keywords: ["keyword list. should be unique to only this command- idea is if no cmdString matches for any command, will loop back to look for keyword in command. no %?% or %#% allowed"],
+            trigger: (param) => {
+                // if your cmdString had a %?% in it, will be passed in as param.
+                return {
+                    // all UIs expect data in this form
+                    params: {
+                        // inner object here is unique to each view
+                        //"audioOptions" is optional, should follow this format- shouldOutput must be set to true to send audio
+                        // property value is the value of the property in the first level of param: {} which contains the text to be used as audio out
+                        "audioOptions": {
+                            shouldOutput: true,
+                            property: "propContainingAudioText"
+                        }
+                    }
+                };
+            },
+            viewName: "name of .pug file which should be displayed as a result of this command"
+        },
+
+    */
     commands: [
         //demo
         {
@@ -40,7 +65,8 @@ module.exports = {
             },
             viewName: "weather"
         },
-        //greeting 
+        //greeting
+        //TESTED, GTG
         {
             name: "greeting",
             cmdStrings: ["hi", "how are you", "what's up", "how are you today", "hello"],
@@ -57,6 +83,7 @@ module.exports = {
             viewName: "textDisplay"
         },
         //empty
+        //TESTED, GTG
         {
             name: "departure/empty",
             cmdStrings: ["goodbye", "see you later", "have a %$% day", "bye", "clear", "off", "turn off", "sleep", "go to sleep"],
@@ -198,19 +225,31 @@ module.exports = {
             cmdStrings: ["turn off", "goodbye", "bye %$%"],
             keywords: ["bye", "off", "shutdown"],
             trigger: (param) => {
-                return 
+                return {
+                    param: {}
+                }
             },
             viewName: "empty"
         },
         //compliment
+        //TESTED, GTG
         {
-            name: "",
-            cmdStrings: [],
-            keywords: [],
+            name: "compliment",
+            cmdStrings: ["how do i look", "do i look %$%"],
+            keywords: ["compliment"],
             trigger: (param) => {
-                return 
+                const returnVals = ["Lookin Smokin!", "You look Fantastic!", "10/10 IGN"];
+                return {
+                    params: {
+                        "text": returnVals[Math.floor(Math.random() * returnVals.length)],
+                        "audioOptions": {
+                            shouldOutput: true,
+                            property: "text"
+                        }
+                    }
+                };
             },
-            viewName: ""
+            viewName: "textDisplay"
         },
         //stock???
         {
@@ -233,13 +272,16 @@ module.exports = {
             viewName: ""
         },
         //wiki webcrawler
+        //TESTED, GTG (ish)
         {
             name: "wikipedia",
             cmdStrings: ["who is %?%", "what is %?%", "where is %?%", "wiki search %?%"],
             keywords: [],
             trigger: (param) => {
+                console.log("requestinig");
                 const queryString = "https://en.wikipedia.org/wiki/" + param.replace("/ /g ", "_");
-                request(queryString, (err, response, body) => {
+                /*request(queryString, (err, response, body) => {
+                    console.log("returning");
                     const $ = cheerio.load(body);
                     let text = $('.mw-parser-output>p').first().text();
                     return {
@@ -248,7 +290,16 @@ module.exports = {
                             source: "wikipedia.org"
                         }
                     }
-                }); 
+                });*/
+                let res = request('GET', queryString);
+                const $ = cheerio.load(res.getBody());
+                let text = $('.mw-parser-output>p').first().text();
+                return {
+                    params: {
+                        text: text,
+                        source: "wikipedia.org"
+                    }
+                }
             },
             viewName: "textDisplay"
         }

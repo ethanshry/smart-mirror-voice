@@ -109,6 +109,10 @@ app.get('/nav/:cmd', (req, res) => {
 	} else {
 		let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param);
 		console.log(paramData);
+		if ("audioOptions" in paramData.params && paramData.params.audioOptions.shouldOutput) {
+			globalData.audioAwaitingOutput = paramData.params[paramData.params.audioOptions.property];
+		}
+		console.log("audio:" + globalData.audioAwaitingOutput);
 		res.render(voiceCommandLibrary.commands[commandData.commandIndex].viewName, paramData);
 	}
 	//res.render('error');

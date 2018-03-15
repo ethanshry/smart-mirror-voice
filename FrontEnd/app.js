@@ -27,6 +27,7 @@ app.use(bodyParser.json());
 
 // global content store
 const globalData = {
+	activeUser: "ethan",
 	audioAwaitingOutput: ""
 };
 
@@ -107,7 +108,7 @@ app.get('/nav/:cmd', (req, res) => {
 	if (commandData.commandIndex == -1) {
 		res.render("error");
 	} else {
-		let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param);
+		let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param, globalData.activeUser);
 		console.log(paramData);
 		if ("audioOptions" in paramData.params && paramData.params.audioOptions.shouldOutput) {
 			globalData.audioAwaitingOutput = paramData.params[paramData.params.audioOptions.property];

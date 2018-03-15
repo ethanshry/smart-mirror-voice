@@ -2,7 +2,10 @@ Remind
     include Mixins/socket.pug
     html
         body
-            
+            ul.itemList
+            for item in params.items
+                li #{item}
+
     style.
         body {
             font-size: 1.3rem;

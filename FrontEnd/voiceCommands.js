@@ -16,7 +16,7 @@ module.exports = {
             name: "descriptive name, only for coder use",
             cmdStrings: ["list of strings. Can make use of %?% for parameter, %#% for continuous whitelist character sequence. Max 1 of each per command"],
             keywords: ["keyword list. should be unique to only this command- idea is if no cmdString matches for any command, will loop back to look for keyword in command. no %?% or %#% allowed"],
-            trigger: (param) => {
+            trigger: (param, activeUser) => {
                 // if your cmdString had a %?% in it, will be passed in as param.
                 return {
                     // all UIs expect data in this form
@@ -96,26 +96,21 @@ module.exports = {
             viewName: "empty"
         },
         //remember
+        // TESTED, GTG
         {
             name: "remember",
             cmdStrings: ["remember %?%", "remind me %?%"],
             keywords: [],
-            trigger: (param) => {
+            trigger: (param, activeUser) => {
                 // STORE param in userData.json
-                fs.readFile('userData.json', (err, json) => {
-                    if (err) throw err;
-                    let content = JSON.parse(json);
-                    content.rememberedItems.push(param);
-                    fs.writeFile('userData.json', JSON.stringify(content), (err) => {
-                        if (err) throw err;
-                        return {
-                            params: {
-                                "text": "I will remember " + param
-                            }
-                        };
-                    });
-                });
-                
+                let content = JSON.parse(fs.readFileSync('./userData.json'));
+                content.users[activeUser].rememberedItems.push(param);
+                fs.writeFileSync('./userData.json', JSON.stringify(content));
+                return {
+                    params: {
+                        "text": "I will remember " + param
+                    }
+                };
             },
             viewName: "textDisplay"
         },
@@ -124,7 +119,7 @@ module.exports = {
             name: "twitter",
             cmdStrings: ["open twitter", "%$% my twitter feed", "%$% top tweets"],
             keywords: ["twitter", "tweets"],
-            trigger: (param) => {
+            trigger: (param, activeUser) => {
                 // TODO: return twitter info
                 return 
             },
@@ -136,7 +131,7 @@ module.exports = {
             name: "timer",
             cmdStrings: ["%$% timer for %?%"],
             keywords: ["timer"],
-            trigger: (param) => {
+            trigger: (param, activeUser) => {
                 // process timer
                 const cmdPiece = param.split(" ");
                 let duration = parseInt(cmdPiece[0]);
@@ -162,71 +157,70 @@ module.exports = {
             name: "home",
             cmdStrings: ["navigate home", "go home", "main", "overview", "welcome screen", "home page", "homepage"],
             keywords: ["home", "welcome"],
-            trigger: (param) => {
+            trigger: (param, activeUser) => {
                 return 
             },
             viewName: "main"
         },
         //forget
+        // TESTED, GTG
         {
             name: "forget",
             cmdStrings: ["forget %?%"],
             keywords: [],
-            trigger: (param) => {
+            trigger: (param, activeUser) => {
                 // search through remembered items, delete if has match
-                fs.readFile('userData.json', (err, json) => {
-                    if (err) throw err;
-                    let content = JSON.parse(json);
-                    if (content.rememberedItems.indexOf(param) != -1) {
-                        content.rememberedItems = content.rememberedItems.splice(content.rememberedItems.indexOf(param), 1);
+                let didDelete = false;
+                let content = JSON.parse(fs.readFileSync('./userData.json'));
+                if (content.users[activeUser].rememberedItems.indexOf(param) != -1) {
+                    didDelete = true;
+                    content.users[activeUser].rememberedItems.splice(content.users[activeUser].rememberedItems.indexOf(param), 1);
+                }
+                fs.writeFileSync('./userData.json', JSON.stringify(content));
+                return {
+                    params: {
+                        text: didDelete ? "Okay, I will forget\n" + param + "\nfor you" : "You have not asked me to remember \n" + param
                     }
-                    fs.writeFile('userData.json', JSON.stringify(content), (err) => {
-                        if (err) throw err;
-                        return {
-                            params: {
-                                text: "Okay, I will forget\n" + param + "\nfor you"
-                            }
-                        }
-                    });
-                });
+                };
                 
             },
             viewName: "textDisplay"
         },
         //remind
+        // TESTED, GTG
         {
             name: "remind",
             cmdStrings: ["%$% what have I forgotten", "remind me", "recall my reminders"],
-            keywords: ["remind", "remember", "forgotten"],
-            trigger: (param) => {
-                fs.readFile('userData.json', (err, json) => {
-                    if (err) throw err;
-                    let content = JSON.parse(json);
-                    return {
-                        params: {
-                            "items": content.rememberedItems
-                        }
-                    };
-                });
+            keywords: ["remind", "recall", "forgotten"],
+            trigger: (param, activeUser) => {
+                let content = JSON.parse(fs.readFileSync('./userData.json'));
+                return {
+                    params: {
+                        "items": content.users[activeUser].rememberedItems
+                    }
+                };
             },
             viewName: "remind"
         },
         //time
         {
-            name: "",
-            cmdStrings: [],
-            keywords: [],
-            trigger: (param) => {
-                return 
+            name: "time",
+            cmdStrings: ["what time is it", "show me the clock", "what's the date", "what day is today"],
+            keywords: ["time", "date"],
+            trigger: (param, activeUser) => {
+                return {
+                    params: {}
+                }
             },
-            viewName: ""
+            viewName: "time"
         },
         //departure
         {
             name: "departure",
             cmdStrings: ["turn off", "goodbye", "bye %$%"],
             keywords: ["bye", "off", "shutdown"],
-            trigger: (param) => {
+            trigger: (param, activeUser) => {
+                // TODO: triger voice off?
                 return {
                     param: {}
                 }
@@ -239,7 +233,7 @@ module.exports = {
             name: "compliment",
             cmdStrings: ["how do i look", "do i look %$%"],
             keywords: ["compliment"],
-            trigger: (param) => {
+            trigger: (param, activeUser) => {
                 const returnVals = ["Lookin Smokin!", "You look Fantastic!", "10/10 IGN"];
                 return {
                     params: {
@@ -258,7 +252,7 @@ module.exports = {
             name: "stock",
             cmdStrings: ["show me my stock overview"],
             keywords: ["stock"],
-            trigger: (param) => {
+            trigger: (param, activeUser) => {
                 let res = request('GET', config.APIStrings.alphavantage + config.APIKeys.alphavantage);
                 const data = JSON.parse(res.getBody());
                 let viewData = {
@@ -292,12 +286,32 @@ module.exports = {
             },
             viewName: "stock"
         },
+        //stock portfolio
+        {
+            name: "",
+            cmdStrings: [],
+            keywords: [],
+            trigger: (param, activeUser) => {
+                return 
+            },
+            viewName: ""
+        },
         //lamp
         {
             name: "",
             cmdStrings: [],
             keywords: [],
-            trigger: (param) => {
+            trigger: (param, activeUser) => {
+                return 
+            },
+            viewName: ""
+        },
+        //iOT IP set
+        {
+            name: "",
+            cmdStrings: [],
+            keywords: [],
+            trigger: (param, activeUser) => {
                 return 
             },
             viewName: ""
@@ -308,7 +322,7 @@ module.exports = {
             name: "wikipedia",
             cmdStrings: ["who is %?%", "what is %?%", "where is %?%", "wiki search %?%"],
             keywords: [],
-            trigger: (param) => {
+            trigger: (param, activeUser) => {
                 console.log("requestinig");
                 const queryString = "https://en.wikipedia.org/wiki/" + param.replace("/ /g ", "_");
                 /*request(queryString, (err, response, body) => {

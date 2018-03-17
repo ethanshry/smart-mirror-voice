@@ -36,33 +36,40 @@ module.exports = {
 
     */
     commands: [
-        //demo
-        {
-            name: "demo",
-            cmdStrings: ["testing 1, 2, 3", "testing", "this is a test"],
-            keywords: ["test"],
-            trigger: (cmdString) => {
-                // ###TODO remove whole command
-                return {
-                    params: {
-                        test: "testing"
-                    }
-                }
-            },
-            viewName: "weather"
-        },
         //weather
         {
             name: "weather",
             cmdStrings: ["weather", "show me the weather", "get the weather", "can I see the weather", "can I see the weather for %?%", "weather for %?%", "weather in %?%"],
             keywords: ["weather"],
-            trigger: (argument) => {
+            trigger: (param, activeUser) => {
+                param = param == undefined ? 63130 : param;
                 // make api call and get weather
+                let requestString = config.APIKeys.openweathermap;
+                if (parseInt(param) != NaN) {
+                    requestString = config.APIStrings.openweathermapzip + requestString;
+                } else {
+                    // ###TODO: Fix, is currently only accepting zip ocdes, errors on cities and never gets here
+                    requestString = config.APIStrings.openweathermapcity + requestString;
+                }
+                requestString = requestString.replace("%?%", param);
+                console.log(requestString);
+                let responseData = {
+                    "condition": null,
+                    "temperature": null,
+                    "humidity": null,
+                    "wind": null,
+                    "windDirection": null
+                };
+                let res = request('GET', requestString);
+                let body = JSON.parse(res.getBody());
+                responseData.condition = body.weather[0].main;
+                responseData.temperature = Math.round((9/5 * body.main.temp - 273.15) + 32);
+                responseData.humidity = body.main.humidity;
+                responseData.wind = body.wind.speed;
+                responseData.windDirection = "N"; //TODO: fix this if we care?
+                console.log(responseData);
                 return {
-                    params: {
-                        temperature: "87",
-                        condition: "overcast"
-                    }
+                    params: responseData
                 }
             },
             viewName: "weather"
@@ -91,7 +98,9 @@ module.exports = {
             cmdStrings: ["goodbye", "see you later", "have a %$% day", "bye", "clear", "off", "turn off", "sleep", "go to sleep"],
             keywords: ["bye", "clear"],
             trigger: (cmdString) => {
-                return
+                return {
+                    params: {}
+                }
             },
             viewName: "empty"
         },
@@ -117,11 +126,30 @@ module.exports = {
         //twitter
         {
             name: "twitter",
-            cmdStrings: ["open twitter", "%$% my twitter feed", "%$% top tweets"],
+            cmdStrings: ["open twitter", "%$% my twitter feed", "%$% top tweets", "tweets about %?%"],
             keywords: ["twitter", "tweets"],
             trigger: (param, activeUser) => {
                 // TODO: return twitter info
-                return 
+                let caller = new twitterAPI({
+                    consumer_key: config.APIKeys.twitter.consumerKey,
+                    consumer_secret: config.APIKeys.twitter.consumerSecret,
+                    access_token_key: config.APIKeys.twitter.accessToken,
+                    access_token_secret: config.APIKeys.twitter.accessTokenSecret
+                });
+                caller.get('search/tweets', {q: param}).then( (error, tweets, response) => {
+                    tweets.statuses.forEach((tweet, index) => {
+                        tweets.statuses[index] = {
+                            text: tweet.text,
+                            timestamp: tweet.created_at,
+                            user: tweet.user.name
+                        }
+                    });
+                    console.log(tweets);
+                    //console.log(tweets.statuses[0].user);
+                    return {
+                        params: tweets
+                    };
+                }); 
             },
             viewName: "twitter"
         },
@@ -153,12 +181,19 @@ module.exports = {
             viewName: "timer"
         },
         //home/welcome
+        // TESTED, GTG (though should display some data, so trigger may need to be altered)
         {
             name: "home",
             cmdStrings: ["navigate home", "go home", "main", "overview", "welcome screen", "home page", "homepage"],
             keywords: ["home", "welcome"],
             trigger: (param, activeUser) => {
-                return 
+                let content = JSON.parse(fs.readFileSync('./userData.json'));
+                return {
+                    params: {
+                        "user": activeUser,
+                        "hotwords": content.users[activeUser].hotwords
+                    }
+                }
             },
             viewName: "main"
         },
@@ -203,6 +238,7 @@ module.exports = {
             viewName: "remind"
         },
         //time
+        // TESTED, GTG
         {
             name: "time",
             cmdStrings: ["what time is it", "show me the clock", "what's the date", "what day is today"],
@@ -215,6 +251,7 @@ module.exports = {
             viewName: "time"
         },
         //departure
+        // TESTED, GTG (remove for empty?)
         {
             name: "departure",
             cmdStrings: ["turn off", "goodbye", "bye %$%"],
@@ -222,7 +259,7 @@ module.exports = {
             trigger: (param, activeUser) => {
                 // TODO: triger voice off?
                 return {
-                    param: {}
+                    params: {}
                 }
             },
             viewName: "empty"
@@ -247,7 +284,7 @@ module.exports = {
             },
             viewName: "textDisplay"
         },
-        //stock???
+        //stock portfolio
         {
             name: "stock",
             cmdStrings: ["show me my stock overview"],
@@ -286,13 +323,17 @@ module.exports = {
             },
             viewName: "stock"
         },
-        //stock portfolio
+        //single stock
         {
             name: "",
             cmdStrings: [],
             keywords: [],
             trigger: (param, activeUser) => {
-                return 
+                return {
+                    params: {
+                        
+                    }
+                }
             },
             viewName: ""
         },
@@ -302,7 +343,11 @@ module.exports = {
             cmdStrings: [],
             keywords: [],
             trigger: (param, activeUser) => {
-                return 
+                return {
+                    params: {
+                        
+                    }
+                }
             },
             viewName: ""
         },
@@ -312,7 +357,11 @@ module.exports = {
             cmdStrings: [],
             keywords: [],
             trigger: (param, activeUser) => {
-                return 
+                return {
+                    params: {
+                        
+                    }
+                }
             },
             viewName: ""
         },
@@ -325,17 +374,6 @@ module.exports = {
             trigger: (param, activeUser) => {
                 console.log("requestinig");
                 const queryString = "https://en.wikipedia.org/wiki/" + param.replace("/ /g ", "_");
-                /*request(queryString, (err, response, body) => {
-                    console.log("returning");
-                    const $ = cheerio.load(body);
-                    let text = $('.mw-parser-output>p').first().text();
-                    return {
-                        params: {
-                            text: text,
-                            source: "wikipedia.org"
-                        }
-                    }
-                });*/
                 let res = request('GET', queryString);
                 const $ = cheerio.load(res.getBody());
                 let text = $('.mw-parser-output>p').first().text();

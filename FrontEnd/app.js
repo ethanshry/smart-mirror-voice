@@ -1,4 +1,4 @@
-// Imports
+// Server Imports
 let express = require('express');
 let app = express();
 let path = require('path');
@@ -6,15 +6,22 @@ let ws = require("nodejs-websocket")
 let bodyParser = require('body-parser')
 let server = require('http').createServer(app);
 
+// Hardware Interface Imports
+let SerialPort = require('serialport');
+
+//API Imports
 let request = require('request');
 let twitterAPI = require('twitter');
 
+// File System Imports
 let fs = require('fs');
 
+//Local File imports
 let Config = require('./config');
 let voiceCommandLibrary = require('./voiceCommands');
 let CommandParser = require('./commandParser');
 
+// Initialize Command Parser from local command library
 let CmdParser = CommandParser.initCommandParser(voiceCommandLibrary);
 
 // App Configuration
@@ -28,13 +35,18 @@ app.use(bodyParser.json());
 // global content store
 const globalData = {
 	activeUser: "ethan",
-	audioAwaitingOutput: ""
+	shouldUpdateUser: false,
+	mirrorIsActive: true,
+	audioAwaitingOutput: "",
+	serialACK: 0
 };
 
 // Start the GUI Server
 server.listen(Config.guiServerPort, () => console.log('running on 3000'));
 
-// Configure the Websocket Server
+/*
+	### Websocket Server ###
+*/
 let wsServer = ws.createServer(function (conn) {
 	console.log("New connection")
 	// var sentData = "";
@@ -55,6 +67,25 @@ let wsServer = ws.createServer(function (conn) {
 			sendData(formatOutgoingWebsocketData('pageselectrequest', newData.packet));
 		} else if (newData.cmd == 'lightrequest') {
 			// ###TODO: Complete arduino integration
+		} else if (newData.cmd == 'shouldswitchuserrequest') {
+			// shouldswitchuserrequest should return an shouldswitchuserresponse
+			// expects noswitch if not active, username:hotwordA,hotwordB,... if active
+			if (globalData.shouldUpdateUser) {
+				globalData.shouldUpdateUser = false;
+				let content = JSON.parse(fs.readFileSync('./userData.json'));
+				let userString = globalData.activeUser + ':' + content.users[globalData.activeUser].hotwords.join(',');
+				sendData(formatOutgoingWebsocketData('shouldswitchuserresponse', userString));
+			} else {
+				sendData(formatOutgoingWebsocketData('shouldswitchuserresponse', 'noswitch'));
+			}
+		} else if (newData.cmd == 'activestatusrequest') {
+			// activestatusrequest should return an activestatusresponse
+			// expects n if not active, anything else if active
+			if (globalData.mirrorIsActive) {
+				sendData(formatOutgoingWebsocketData('activestatusresponse', 'y'));
+			} else {
+				sendData(formatOutgoingWebsocketData('activestatusresponse', 'n'));
+			}
 		}
 	})
 	conn.on("close", function (code, reason) {
@@ -92,7 +123,9 @@ function formatOutgoingWebsocketData(cmd, packet) {
 	return "~-~" + cmd + "~.~" + packet + "~_~";
 }
 
-// ### Routes ###
+/*
+	### Routes ### (Main NPM Server)
+*/
 
 app.get('/', (req,res) => {
 	res.render("main");
@@ -119,6 +152,47 @@ app.get('/nav/:cmd', (req, res) => {
 	//res.render('error');
 });
 
+/*
+	### Serial Communication ###
+*/
+
+let sp = new SerialPort("/dev/ttyACM0", {
+	baudRate: 115200
+});
+
+sp.on("open", () => {
+	console.log("Serial Comm Connection Open");
+});
+
+sp.on("error", (error) => {
+	console.error("Serial Comm Error: ", error);
+});
+
+sp.on("close", () => {
+	console.log("Serial Comm Port Closed");
+});
+
+sp.on("data", (data) => {
+	let bufferedData = new Buffer(data, 'utf');
+	console.log("Recieved Serial Data: " + bufferedData);
+	globalData.serialACK = 1;
+});
+
+async function writeSerial(serialSends) {
+	for (let i = 0; i < serialSends.length; i++) {
+		globalData.serialACK = 0;
+		sp.write(serialSends[i]);
+		while (!serialACK) {
+			await sleep(100);
+		}
+	}
+}
+
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ###TODO: Remove from final project
 app.get('/api/:test', (req, res) => {
 	console.log(req.params.test);
 	switch (req.params.test) {

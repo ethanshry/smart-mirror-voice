@@ -17,15 +17,20 @@ from websocket import create_connection
 config = {
     "shouldSpeak": False,
     "shouldTriggerVisualIndicator": False, #WTH does this do rn
-    "wsPort": 8080,
+    "wsPort": "8080",
     "wsRequestStrings": {
         "light": "lightrequest",
         "client": "clientpassthrough",
         "audioOutReq": "audiooutrequest",
-        "audioOutRes": "audiooutresponse"
+        "audioOutRes": "audiooutresponse",
+        "switchUserReq": "shouldswitchuserrequest",
+        "switchUserRes": "shouldswitchuserresponse",
+        "checkIsActiveReq": "activestatusrequest",
+        "checkIsActiveRes": "activestatusresponse"
     },
     "hotwordList": ["clara"],
-    "audioQueue": ""
+    "audioQueue": "",
+    "mirrorIsActive": True
 }
 
 def formatOutgoingWsMsg(command, packet):
@@ -58,6 +63,36 @@ def audioOutCheck():
         print('Outputting audio')
         if config['shouldSpeak']: aiy.audio.say(content['packet'])
 
+#UNTESTED
+def userSwitchCheck():
+    global config
+    ws = create_connection("ws://localhost:" + config["wsPort"] + "/websocket")
+    ws.send(formatOutgoingWsMsg(config["wsRequestStrings"]["switchUserReq"], "shouldswitch"))
+    content = ws.recv()
+    content = processIncomingMessage(content)
+    ws.close()
+    if content["cmd"] == config["wsRequestStrings"]["switchUserRes"] and content["packet"] == "noswitch":
+        print('Same user')
+    else:
+        # new user data will come in form Username:hotwordA,hotwordB,...
+        newuser = content["packet"].split(':')
+        config["hotwordList"] = newuser[1].split(',')
+        print('New User, welcome ', newuser[0])
+        if config['shouldSpeak']: aiy.audio.say("Welcome " + str(newuser[0]))
+
+#UNTESTED
+def isActiveCheck():
+    global config
+    ws = create_connection("ws://localhost:" + config["wsPort"] + "/websocket")
+    ws.send(formatOutgoingWsMsg(config["wsRequestStrings"]["checkIsActiveReq"], "isactive"))
+    content = ws.recv()
+    content = processIncomingMessage(content)
+    ws.close()
+    if content["cmd"] == config["wsRequestStrings"]["checkIsActiveRes"] and content["packet"] == "n":
+        config["mirrorIsActive"] = False
+    else:
+        config["mirrorIsActive"] = True
+
 def main():
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(31, GPIO.OUT)
@@ -66,27 +101,50 @@ def main():
     #recognizer.expect_phrase('turn off the light')
     #recognizer.expect_hotword('Clara')
     aiy.audio.get_recorder().start()
-
+    # Visual indicator for kiosk testing
+    GPIO.output(31, GPIO.HIGH)
+    time.sleep(.2)
+    GPIO.output(31, GPIO.LOW)
+    time.sleep(.2)
+    GPIO.output(31, GPIO.HIGH)
+    time.sleep(.2)
+    GPIO.output(31, GPIO.LOW)
+    time.sleep(.2)
+    GPIO.output(31, GPIO.HIGH)
+    time.sleep(.2)
+    GPIO.output(31, GPIO.LOW)
     while True:
         print('Listening...')
         text = ""
+        # would love to better break all this stuff up somehow
         while (text == None) or any(hotword not in text.lower() for hotword in config["hotwordList"]):
-            audioOutCheck()
-            text = recognizer.recognize()
+            if config["mirrorIsActive"] == False:
+                # will this delay anything? who knows man
+                isActiveCheck()
+                time.sleep(3)
+            else:
+                # perhaps need to check less than ebery cycle? will expirement
+                isActiveCheck()
+                audioOutCheck()
+                userSwitchCheck()
+                text = recognizer.recognize()
         # hotword detected, moving on
+        # Visual indicator for kiosk testing
+        GPIO.output(31, GPIO.HIGH)
         sendWsMesage(formatOutgoingWsMsg(config["wsRequestStrings"]["light"],"hotwordtriggered"))
         text = recognizer.recognize()
+        # Visual indicator for kiosk testing
+        GPIO.output(31, GPIO.LOW)
         if not text:
             print('Sorry, I did not hear you.')
             sendWsMesage(formatOutgoingWsMsg(config["wsRequestStrings"]["light"],"clear"))
         else:
             sendWsMesage(formatOutgoingWsMsg(config["wsRequestStrings"]["light"],"thinking"))
             print('You said "', text, '"')
-            GPIO.output(31, GPIO.HIGH)
+            
             
             sendWsMesage(formatOutgoingWsMsg(config["wsRequestStrings"]["client"],text))
-            time.sleep(1)
-            GPIO.output(31, GPIO.LOW)
+            
             # maybe want this? idk?
             sendWsMesage(formatOutgoingWsMsg(config["wsRequestStrings"]["light"],"clear"))
 

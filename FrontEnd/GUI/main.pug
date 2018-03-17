@@ -3,10 +3,20 @@ Main
     html
         body
             div.header Welcome to the Main Page!
+            div Welcome #{params.user}
+            div Reminder, your hotwords are: <br />
+                for item, index in params.hotwords
+                    if index + 1 != params.hotwords.length
+                        span #{item}, 
+                    else
+                        span and #{item} 
             
     style.
         body {
-            font-size: 1.3rem;
+            font-size: 1.7rem;
+            color: white;
+            background-color: black;
+            text-align: center;
         }
         .header {
             width: 100vw;

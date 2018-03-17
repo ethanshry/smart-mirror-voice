@@ -67,6 +67,7 @@ let wsServer = ws.createServer(function (conn) {
 			sendData(formatOutgoingWebsocketData('pageselectrequest', newData.packet));
 		} else if (newData.cmd == 'lightrequest') {
 			// ###TODO: Complete arduino integration
+			sendLightSignal(newData.packet);
 		} else if (newData.cmd == 'shouldswitchuserrequest') {
 			// shouldswitchuserrequest should return an shouldswitchuserresponse
 			// expects noswitch if not active, username:hotwordA,hotwordB,... if active
@@ -190,6 +191,25 @@ async function writeSerial(serialSends) {
 
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/*
+	### Utility Methods ###
+*/
+
+function sendLightSignal(signalKey) {
+	switch (signalKey.lower()) {
+		case 'clear':
+			break;
+		case 'hotwordtriggered':
+			break;
+		case 'thinking':
+			break;
+		default:
+			// confused signal
+			console.log('Trying to send light signal with unknown code, code: ' + signalKey.lower());
+			break;
+	}
 }
 
 // ###TODO: Remove from final project

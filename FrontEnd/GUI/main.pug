@@ -1,5 +1,6 @@
 Main 
     include Mixins/socket.pug
+    include Mixins/stylePackage.pug
     html
         body
             div.header Welcome to the Main Page!
@@ -25,3 +26,4 @@ Main
             font-size: 20px;
         }
     +socketScript()
+    +stylePackage()

@@ -1,5 +1,6 @@
 Remind 
     include Mixins/socket.pug
+    include Mixins/stylePackage.pug
     html
         body
             ul.itemList
@@ -17,3 +18,4 @@ Remind
             font-size: 20px;
         }
     +socketScript()
+    +stylePackage()

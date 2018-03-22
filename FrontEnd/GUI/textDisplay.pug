@@ -1,5 +1,6 @@
 TextDisplay 
     include Mixins/socket.pug
+    include Mixins/stylePackage.pug
     html
         body
             div #{params.text} 
@@ -25,4 +26,5 @@ TextDisplay
             font-size: 20px;
         }
     +socketScript()
+    +stylePackage()
 

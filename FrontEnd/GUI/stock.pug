@@ -1,5 +1,6 @@
 Main 
     include Mixins/socket.pug
+    include Mixins/stylePackage.pug
     html
         body
         div.stockWrapper
@@ -81,3 +82,4 @@ Main
         });
 
     +socketScript()
+    +stylePackage()

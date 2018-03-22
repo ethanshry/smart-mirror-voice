@@ -1,5 +1,6 @@
 Weather 
     include Mixins/socket.pug
+    include Mixins/stylePackage.pug
     html
         body
             div.header Welcome to the WEATHER Page!
@@ -15,3 +16,4 @@ Weather
             font-size: 20px;
         }
     +socketScript()
+    +stylePackage()

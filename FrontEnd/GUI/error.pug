@@ -1,5 +1,7 @@
 Error 
     include Mixins/socket.pug
+    include Mixins/stylePackage.pug
+    // params: {}
     html
         body
             div.header Error, the command you have stated is not within our database. Please try again
@@ -15,3 +17,4 @@ Error
             font-size: 20px;
         }
     +socketScript()
+    +stylePackage()

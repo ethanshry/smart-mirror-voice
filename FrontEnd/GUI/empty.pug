@@ -1,5 +1,7 @@
 Empty 
     include Mixins/socket.pug
+    include Mixins/stylePackage.pug
+    // params:{}
     html
         body empty view, will be dark and look like we're off
             
@@ -14,3 +16,4 @@ Empty
             font-size: 20px;
         }
     +socketScript()
+    +stylePackage()

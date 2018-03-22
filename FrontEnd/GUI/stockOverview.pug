@@ -1,0 +1,120 @@
+Main 
+    include Mixins/socket.pug
+    include Mixins/stylePackage.pug
+    // 
+        params: {
+            stockData:
+                stockSeries: [
+                    {
+                        title: title,
+                        data: data,
+                        labels: labels
+                    },
+                    {etc...}
+                ]
+        }
+    html
+        body
+        div.viewWrapper
+            div.rowWrapper
+                div.stockWrapper
+                    canvas#stock1(width="400", height="400")
+                div.stockWrapper
+                    canvas#stock2(width="400", height="400")
+            div.rowWrapper
+                div.stockWrapper
+                    canvas#stock3(width="400", height="400")
+                div.stockWrapper
+                    canvas#stock4(width="400", height="400")
+            div.rowWrapper
+                div.stockWrapper
+                    canvas#stock5(width="400", height="400")
+                div.stockWrapper
+                    canvas#stock6(width="400", height="400")
+    style.
+        body {
+            font-size: 1.3rem;
+            background-color: black;
+            color: white;
+        }
+        .header {
+            width: 100vw;
+            height: 10vh;
+            text-align: center;
+            font-size: 20px;
+        }
+        .stockWrapper {
+            width: 400px;
+            height: 400px;
+        }
+        .viewWrapper {
+            display: flex;
+            flex-direction: column;
+        }
+        .rowWrapper {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+        }
+        span {
+            color: blue;
+        }
+    
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js")
+
+    script.
+        let ctxArray = [
+            document.getElementById("stock1").getContext("2d"),
+            document.getElementById("stock2").getContext("2d"),
+            document.getElementById("stock3").getContext("2d"),
+            document.getElementById("stock4").getContext("2d"),
+            document.getElementById("stock5").getContext("2d"),
+            document.getElementById("stock6").getContext("2d")
+        ];
+        let data = !{JSON.stringify(params.stockData)};
+        const charts = ctxArray.map((ctx, index) => {
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.stockSeries[index].labels,
+                    datasets: [{
+                        label: '1',
+                        pointRadius: 0,
+                        borderColor: '#0fcc0c',
+                        fill: false,
+                        data: data.stockSeries[index].data
+                    }]
+                },
+                options: {
+                    title: {
+                    display: true,
+                    text: data.stockSeries[index].title,
+                    fontColor: '#fff',
+                    fontSize: 18
+                    },
+                    legend: {display: false},
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                display: false
+                            },
+                            gridLines: {
+                                zeroLineColor: '#fff'
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                fontColor: '#fff',
+                                fontSize: 14
+                            },
+                            gridLines: {
+                                zeroLineColor: '#fff'
+                            }
+                        }]
+                    }
+                }
+            });
+        });
+
+    +socketScript()
+    +stylePackage()

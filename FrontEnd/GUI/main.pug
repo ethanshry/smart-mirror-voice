@@ -1,5 +1,10 @@
 Main 
     include Mixins/socket.pug
+    include Mixins/stylePackage.pug
+    // params: {
+            "user": user,
+            "hotwords": [hotword1, hotword2, etc]
+        }
     html
         body
             div.header Welcome to the Main Page!
@@ -25,3 +30,4 @@ Main
             font-size: 20px;
         }
     +socketScript()
+    +stylePackage()

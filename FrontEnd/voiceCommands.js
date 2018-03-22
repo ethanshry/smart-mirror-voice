@@ -10,7 +10,7 @@
 
 let request = require('sync-request');
 let twitterAPI = require('twitter');
-
+//used for wikipedia API body parsing
 let cheerio = require('cheerio');
 
 let fs = require('fs');
@@ -48,6 +48,8 @@ module.exports = {
                             property: "propContainingAudioText"
                         }
                     }
+                    // as alternate, if your trigger experiences an error, can return
+                    error: "error message"
                 };
             },
             viewName: "name of .pug file which should be displayed as a result of this command i.e. stockView"
@@ -56,6 +58,7 @@ module.exports = {
     */
     commands: [
         //weather
+        // tested, GTG
         {
             name: "weather",
             cmdStrings: ["weather", "show me the weather", "get the weather", "can I see the weather", "can I see the weather for %?%", "weather for %?%", "weather in %?%"],
@@ -64,14 +67,12 @@ module.exports = {
                 param = param == undefined ? 63130 : param;
                 // make api call and get weather
                 let requestString = config.APIKeys.openweathermap;
-                if (parseInt(param) != NaN) {
-                    requestString = config.APIStrings.openweathermapzip + requestString;
-                } else {
-                    // ###TODO: Fix, is currently only accepting zip ocdes, errors on cities and never gets here
+                if (isNaN(param)) {
                     requestString = config.APIStrings.openweathermapcity + requestString;
+                } else {
+                    requestString = config.APIStrings.openweathermapzip + requestString;
                 }
                 requestString = requestString.replace("%?%", param);
-                console.log(requestString);
                 let responseData = {
                     "condition": null,
                     "temperature": null,
@@ -80,15 +81,20 @@ module.exports = {
                     "windDirection": null
                 };
                 let res = request('GET', requestString);
-                let body = JSON.parse(res.getBody());
-                responseData.condition = body.weather[0].main;
-                responseData.temperature = Math.round((9/5 * body.main.temp - 273.15) + 32);
-                responseData.humidity = body.main.humidity;
-                responseData.wind = body.wind.speed;
-                responseData.windDirection = "N"; //TODO: fix this if we care?
-                console.log(responseData);
-                return {
-                    params: responseData
+                if (res.responseCode == 200) {
+                    let body = JSON.parse(res.getBody());
+                    responseData.condition = body.weather[0].main;
+                    responseData.temperature = Math.round((9/5 * body.main.temp - 273.15) + 32);
+                    responseData.humidity = body.main.humidity;
+                    responseData.wind = body.wind.speed;
+                    responseData.windDirection = "N"; //TODO: fix this if we care?
+                    return {
+                        params: responseData
+                    }
+                } else {
+                    return {
+                        error: "Sorry, could not get the weather for " + param
+                    }
                 }
             },
             viewName: "weather"
@@ -99,12 +105,16 @@ module.exports = {
             name: "greeting",
             cmdStrings: ["hi", "how are you", "what's up", "how are you today", "hello"],
             keywords: ["hello"],
-            trigger: (cmdString) => {
+            trigger: (param, activeUser) => {
                 // expand return options
-                const returnVals = ["I'm good", "It's nice to see you today", "Welcome back!"];
+                const returnVals = ["Welcome, " + activeUser, "Hello " + activeUser + ". It's nice to see you today", "Welcome back!"];
                 return {
                     params: {
-                        "text": returnVals[Math.floor(Math.random() * returnVals.length)]
+                        "text": returnVals[Math.floor(Math.random() * returnVals.length)],
+                        "audioOptions": {
+                            shouldOutput: true,
+                            property: "text"
+                        }
                     }
                 };
             },
@@ -136,7 +146,11 @@ module.exports = {
                 fs.writeFileSync('./userData.json', JSON.stringify(content));
                 return {
                     params: {
-                        "text": "I will remember " + param
+                        "text": "I will remember " + param,
+                        "audioOptions": {
+                            shouldOutput: true,
+                            property: "text"
+                        }
                     }
                 };
             },
@@ -193,7 +207,12 @@ module.exports = {
                 }
                 return {
                     params: {
-                        duration: duration
+                        duration: duration,
+                        text: "timer set for " + param,
+                        "audioOptions": {
+                            shouldOutput: true,
+                            property: "text"
+                        }
                     }
                 }
             },
@@ -233,7 +252,11 @@ module.exports = {
                 fs.writeFileSync('./userData.json', JSON.stringify(content));
                 return {
                     params: {
-                        text: didDelete ? "Okay, I will forget\n" + param + "\nfor you" : "You have not asked me to remember \n" + param
+                        text: didDelete ? "Okay, I will forget\n" + param + "\nfor you" : "You have not asked me to remember \n" + param,
+                        "audioOptions": {
+                            shouldOutput: true,
+                            property: "text"
+                        }
                     }
                 };
                 
@@ -273,7 +296,7 @@ module.exports = {
         // TESTED, GTG (remove for empty?)
         {
             name: "departure",
-            cmdStrings: ["turn off", "goodbye", "bye %$%"],
+            cmdStrings: ["turn off", "goodbye %$%", "bye %$%"],
             keywords: ["bye", "off", "shutdown"],
             trigger: (param, activeUser) => {
                 // TODO: triger voice off?
@@ -304,57 +327,109 @@ module.exports = {
             viewName: "textDisplay"
         },
         //stock portfolio
+        // TESTED, GTG
         {
             name: "stock",
-            cmdStrings: ["show me my stock overview"],
-            keywords: ["stock"],
+            cmdStrings: ["%$% stock overview"],
+            keywords: [""],
             trigger: (param, activeUser) => {
-                let res = request('GET', config.APIStrings.alphavantage + config.APIKeys.alphavantage);
-                const data = JSON.parse(res.getBody());
-                let viewData = {
-                    title: data["Meta Data"]["2. Symbol"],
-                    data: [],
-                    labels: []
+                // construct data outline:
+                let returnVal = {
+                    stockSeries: []
                 };
-                let hasChange = false;
-                for (let key in data["Time Series (Daily)"]) {
-                    if (hasChange == false) {
-                        let change = Number(data["Time Series (Daily)"][key]["4. close"]) - Number(data["Time Series (Daily)"][key]["1. open"]);
-                        if (change >= 0) {
-                            viewData.title += " \u25B2 " + Math.round(change * 100) / 100;
-                        } else {
-                            viewData.title += " \u25BC " + Math.round(Math.abs(change) * 100) / 100;
-                        }
-                        hasChange = true;
-                    }
-                    let item = {
-                        x: Date.parse(key),
-                        y: Number(data["Time Series (Daily)"][key]["4. close"])
+                let content = JSON.parse(fs.readFileSync('./userData.json'));
+                content.users[activeUser].importantStocks.forEach((stock) => {
+                    console.log('grabbing stock data for ' + stock);
+                    let res = request('GET', config.APIStrings.alphavantage.replace("%?%", stock) + config.APIKeys.alphavantage);
+                    const data = JSON.parse(res.getBody());
+                    let viewData = {
+                        title: data["Meta Data"]["2. Symbol"],
+                        data: [],
+                        labels: []
                     };
-                    viewData.data.push(item);
-                    viewData.labels.push(key);
-                }
+                    let hasChange = false;
+                    for (let key in data["Time Series (Daily)"]) {
+                        // on first time through, create a +/- header for the graph based on today's open vs. current performance
+                        if (hasChange == false) {
+                            let change = Number(data["Time Series (Daily)"][key]["4. close"]) - Number(data["Time Series (Daily)"][key]["1. open"]);
+                            if (change >= 0) {
+                                viewData.title += " \u25B2 " + Math.round(change * 100) / 100;
+                            } else {
+                                viewData.title += " \u25BC " + Math.round(Math.abs(change) * 100) / 100;
+                            }
+                            hasChange = true;
+                        }
+                        let item = {
+                            x: Date.parse(key),
+                            y: Number(data["Time Series (Daily)"][key]["4. close"])
+                        };
+                        viewData.data.push(item);
+                        viewData.labels.push(key);
+                    }
+                    // must flip order of labels so that they run old-new for the graphing API
+                    viewData.data = viewData.data.reverse();
+                    viewData.labels = viewData.labels.reverse();
+                    returnVal.stockSeries.push(viewData);
+                });
                 return {
                     params: {
-                        stockData: viewData
+                        stockData: returnVal
+                    }
+                }
+            },
+            viewName: "stockOverview"
+        },
+        //single stock
+        // TESTED, GTG
+        {
+            name: "single stock",
+            cmdStrings: ["show me stock data for %?%", "what does the stock of %?% look like", "stock %$% for %?%"],
+            keywords: [],
+            trigger: (param, activeUser) => {
+                console.log('grabbing stock data for ' + param);
+                let res = request('GET', config.APIStrings.alphavantage.replace("%?%", param) + config.APIKeys.alphavantage);
+                const data = JSON.parse(res.getBody());
+                if ("Error Message" in data) {
+                    return {
+                        error: "Sorry, no stock data could be found for " + param
+                    }
+                } else {
+                    let viewData = {
+                        title: data["Meta Data"]["2. Symbol"],
+                        data: [],
+                        labels: []
+                    };
+                    let hasChange = false;
+                    for (let key in data["Time Series (Daily)"]) {
+                        // on first time through, create a +/- header for the graph based on today's open vs. current performance
+                        if (hasChange == false) {
+                            let change = Number(data["Time Series (Daily)"][key]["4. close"]) - Number(data["Time Series (Daily)"][key]["1. open"]);
+                            if (change >= 0) {
+                                viewData.title += " \u25B2 " + Math.round(change * 100) / 100;
+                            } else {
+                                viewData.title += " \u25BC " + Math.round(Math.abs(change) * 100) / 100;
+                            }
+                            hasChange = true;
+                        }
+                        let item = {
+                            x: Date.parse(key),
+                            y: Number(data["Time Series (Daily)"][key]["4. close"])
+                        };
+                        viewData.data.push(item);
+                        viewData.labels.push(key);
+                    }
+                    // must flip order of labels so that they run old-new for the graphing API
+                    viewData.data = viewData.data.reverse();
+                    viewData.labels = viewData.labels.reverse();
+                    
+                    return {
+                        params: {
+                            stockData: viewData
+                        }
                     }
                 }
             },
             viewName: "stock"
-        },
-        //single stock
-        {
-            name: "",
-            cmdStrings: [],
-            keywords: [],
-            trigger: (param, activeUser) => {
-                return {
-                    params: {
-                        
-                    }
-                }
-            },
-            viewName: ""
         },
         //lamp
         {
@@ -371,37 +446,63 @@ module.exports = {
             viewName: ""
         },
         //iOT IP set
+        // DONE, UNTESTED
         {
-            name: "",
-            cmdStrings: [],
+            name: "set ip",
+            cmdStrings: ["set lamp ip to %?%"],
             keywords: [],
             trigger: (param, activeUser) => {
+                const conversions = {
+                    "one": 1,
+                    "two": 2,
+                    "three": 3,
+                    "four": 4,
+                    "five": 5,
+                    "six": 6,
+                    "seven": 7,
+                    "eight": 8,
+                    "nine": 9,
+                    "point": ".",
+                    " ": ""
+                }
+                console.log(param);
+                Object.keys(conversions).forEach((key) => {
+                    param = param.split(key).join(conversions[key]);
+                });
+
                 return {
                     params: {
-                        
+                        text: "IP set to " + param
                     }
                 }
             },
-            viewName: ""
+            viewName: "textDisplay"
         },
         //wiki webcrawler
         //TESTED, GTG (ish)
+        // would love to put a lot more time into web scraping- wonder if brain.js would be useful here
         {
             name: "wikipedia",
-            cmdStrings: ["who is %?%", "what is %?%", "where is %?%", "wiki search %?%"],
+            cmdStrings: ["who is %?%", "what is %?%", "where is %?%", "wiki search %?%", "what are %?%"],
             keywords: [],
             trigger: (param, activeUser) => {
-                console.log("requestinig");
+                // wiki articles follow naming convention .../wiki/word1_word2_...
                 const queryString = "https://en.wikipedia.org/wiki/" + param.replace("/ /g ", "_");
                 let res = request('GET', queryString);
-                const $ = cheerio.load(res.getBody());
-                let text = $('.mw-parser-output>p').first().text();
-                return {
-                    params: {
-                        text: text,
-                        source: "wikipedia.org"
+                if (res.statusCode == 200) {
+                    // cheerio mimics jQuery, so lets make it super jQuery-esque
+                    const $ = cheerio.load(res.getBody());
+                    return {
+                        params: {
+                            text: $('.mw-parser-output>p').first().text(),
+                            source: 'wikipedia.org'
+                        }
                     }
-                }
+                } else {
+                    return {
+                        error: "Sorry, an error occured. We couldn't find data on " + param
+                    }
+                }    
             },
             viewName: "textDisplay"
         }

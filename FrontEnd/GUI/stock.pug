@@ -1,5 +1,15 @@
 Main 
     include Mixins/socket.pug
+    include Mixins/stylePackage.pug
+    //
+        params: {
+            stockData:
+                {
+                    title: title,
+                    data: data,
+                    labels: labels
+                }
+        }
     html
         body
         div.stockWrapper
@@ -41,13 +51,13 @@ Main
         let stockChart1 = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: data.labels.reverse(),
+                labels: data.labels,
                 datasets: [{
                     label: 'one',
                     pointRadius: 0,
                     borderColor: '#0fcc0c',
                     fill: false,
-                    data: data.data.reverse()
+                    data: data.data
                 }]
             },
             options: {
@@ -81,3 +91,4 @@ Main
         });
 
     +socketScript()
+    +stylePackage()

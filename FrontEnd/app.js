@@ -44,7 +44,8 @@ app.use(bodyParser.json());
 // global content store
 const globalData = {
 	activeUser: "ethan",
-	shouldUpdateUser: false,
+	// start true so will update hotwords ASAP
+	shouldUpdateUser: true,
 	mirrorIsActive: true,
 	audioAwaitingOutput: "",
 	serialACK: 0
@@ -165,7 +166,7 @@ app.get('/nav/:cmd', (req, res) => {
 		let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param, globalData.activeUser);
 		console.log(paramData);
 		if ("error" in paramData) {
-			res.render('textView', {params: { text: paramData.error}});
+			res.render('textDisplay', {params: { text: paramData.error}});
 		} else {
 			if ("audioOptions" in paramData.params && paramData.params.audioOptions.shouldOutput) {
 				globalData.audioAwaitingOutput = paramData.params[paramData.params.audioOptions.property];
@@ -241,26 +242,6 @@ function sendLightSignal(signalKey) {
 app.get('/api/:test', (req, res) => {
 	console.log(req.params.test);
 	switch (req.params.test) {
-		case 'weather':
-			let requestString = Config.APIStrings.openweathermap.replace('%?%', Config.APIKeys.openweathermap);
-			console.log(requestString);
-			let responseData = {
-				"condition": null,
-				"temperature": null,
-				"humidity": null,
-				"wind": null,
-				"windDirection": null
-			};
-			request(requestString, (err, response, body) => {
-				body = JSON.parse(body);
-				responseData.condition = body.weather[0].main;
-				responseData.temperature = Math.round((9/5 * body.main.temp - 273.15) + 32);
-				responseData.humidity = body.main.humidity;
-				responseData.wind = body.wind.speed;
-				responseData.windDirection = "N";
-				console.log(responseData);
-			});
-			break;
 		case 'twitter':
 			let caller = new twitterAPI({
 				consumer_key: Config.APIKeys.twitter.consumerKey,

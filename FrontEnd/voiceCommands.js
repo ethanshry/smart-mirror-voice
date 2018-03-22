@@ -10,7 +10,7 @@
 
 let request = require('sync-request');
 let twitterAPI = require('twitter');
-
+//used for wikipedia API body parsing
 let cheerio = require('cheerio');
 
 let fs = require('fs');
@@ -83,7 +83,7 @@ module.exports = {
                     "windDirection": null
                 };
                 let res = request('GET', requestString);
-                if (res.responseCode != 404) {
+                if (res.responseCode == 200) {
                     let body = JSON.parse(res.getBody());
                     responseData.condition = body.weather[0].main;
                     responseData.temperature = Math.round((9/5 * body.main.temp - 273.15) + 32);
@@ -95,7 +95,9 @@ module.exports = {
                         params: responseData
                     }
                 } else {
-
+                    return {
+                        error: "Sorry, could not get the weather for " + param
+                    }
                 }
             },
             viewName: "weather"
@@ -106,9 +108,9 @@ module.exports = {
             name: "greeting",
             cmdStrings: ["hi", "how are you", "what's up", "how are you today", "hello"],
             keywords: ["hello"],
-            trigger: (cmdString) => {
+            trigger: (param, activeUser) => {
                 // expand return options
-                const returnVals = ["I'm good", "It's nice to see you today", "Welcome back!"];
+                const returnVals = ["Welcome, " + activeUser, "Hello " + activeUser + ". It's nice to see you today", "Welcome back!"];
                 return {
                     params: {
                         "text": returnVals[Math.floor(Math.random() * returnVals.length)]
@@ -313,41 +315,54 @@ module.exports = {
         //stock portfolio
         {
             name: "stock",
-            cmdStrings: ["show me my stock overview"],
-            keywords: ["stock"],
+            cmdStrings: ["%$% stock overview"],
+            keywords: [""],
             trigger: (param, activeUser) => {
-                let res = request('GET', config.APIStrings.alphavantage + config.APIKeys.alphavantage);
-                const data = JSON.parse(res.getBody());
-                let viewData = {
-                    title: data["Meta Data"]["2. Symbol"],
-                    data: [],
-                    labels: []
+                // construct data outline:
+                let returnVal = {
+                    stockSeries: []
                 };
-                let hasChange = false;
-                for (let key in data["Time Series (Daily)"]) {
-                    if (hasChange == false) {
-                        let change = Number(data["Time Series (Daily)"][key]["4. close"]) - Number(data["Time Series (Daily)"][key]["1. open"]);
-                        if (change >= 0) {
-                            viewData.title += " \u25B2 " + Math.round(change * 100) / 100;
-                        } else {
-                            viewData.title += " \u25BC " + Math.round(Math.abs(change) * 100) / 100;
-                        }
-                        hasChange = true;
-                    }
-                    let item = {
-                        x: Date.parse(key),
-                        y: Number(data["Time Series (Daily)"][key]["4. close"])
+                let content = JSON.parse(fs.readFileSync('./userData.json'));
+                content.users[activeUser].importantStocks.forEach((stock) => {
+                    console.log('grabbing stock data for ' + stock);
+                    let res = request('GET', config.APIStrings.alphavantage.replace("%?%", stock) + config.APIKeys.alphavantage);
+                    const data = JSON.parse(res.getBody());
+                    let viewData = {
+                        title: data["Meta Data"]["2. Symbol"],
+                        data: [],
+                        labels: []
                     };
-                    viewData.data.push(item);
-                    viewData.labels.push(key);
-                }
+                    let hasChange = false;
+                    for (let key in data["Time Series (Daily)"]) {
+                        // on first time through, create a +/- header for the graph based on today's open vs. current performance
+                        if (hasChange == false) {
+                            let change = Number(data["Time Series (Daily)"][key]["4. close"]) - Number(data["Time Series (Daily)"][key]["1. open"]);
+                            if (change >= 0) {
+                                viewData.title += " \u25B2 " + Math.round(change * 100) / 100;
+                            } else {
+                                viewData.title += " \u25BC " + Math.round(Math.abs(change) * 100) / 100;
+                            }
+                            hasChange = true;
+                        }
+                        let item = {
+                            x: Date.parse(key),
+                            y: Number(data["Time Series (Daily)"][key]["4. close"])
+                        };
+                        viewData.data.push(item);
+                        viewData.labels.push(key);
+                    }
+                    // must flip order of labels so that they run old-new for the graphing API
+                    viewData.data = viewData.data.reverse();
+                    viewData.labels = viewData.labels.reverse();
+                    returnVal.stockSeries.push(viewData);
+                });
                 return {
                     params: {
-                        stockData: viewData
+                        stockData: returnVal
                     }
                 }
             },
-            viewName: "stock"
+            viewName: "stockOverview"
         },
         //single stock
         {
@@ -418,19 +433,23 @@ module.exports = {
             cmdStrings: ["who is %?%", "what is %?%", "where is %?%", "wiki search %?%", "what are %?%"],
             keywords: [],
             trigger: (param, activeUser) => {
+                // wiki articles follow naming convention .../wiki/word1_word2_...
                 const queryString = "https://en.wikipedia.org/wiki/" + param.replace("/ /g ", "_");
                 let res = request('GET', queryString);
-                let text = "Sorry, an error occured. We couldn't find data on " + param;
-                if (res.statusCode != 404) {
+                if (res.statusCode == 200) {
+                    // cheerio mimics jQuery, so lets make it super jQuery-esque
                     const $ = cheerio.load(res.getBody());
-                    text = $('.mw-parser-output>p').first().text();
-                }
-                return {
-                    params: {
-                        text: text,
-                        source: 'wikipedia.org'
+                    return {
+                        params: {
+                            text: $('.mw-parser-output>p').first().text(),
+                            source: 'wikipedia.org'
+                        }
                     }
-                }
+                } else {
+                    return {
+                        error: "Sorry, an error occured. We couldn't find data on " + param
+                    }
+                }    
             },
             viewName: "textDisplay"
         }

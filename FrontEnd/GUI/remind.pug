@@ -1,6 +1,10 @@
 Remind 
     include Mixins/socket.pug
     include Mixins/stylePackage.pug
+    // 
+        params: {
+                "items": content.users[activeUser].rememberedItems
+            }
     html
         body
             ul.itemList

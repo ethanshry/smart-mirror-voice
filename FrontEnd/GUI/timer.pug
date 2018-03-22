@@ -1,6 +1,10 @@
 Timer 
     include Mixins/socket.pug
     include Mixins/stylePackage.pug
+    //
+        params: {
+            duration: "duration (s)"
+        }
     html
         body
             div#timerView Timing for #{params.duration} seconds

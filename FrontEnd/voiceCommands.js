@@ -58,6 +58,7 @@ module.exports = {
     */
     commands: [
         //weather
+        // tested, GTG
         {
             name: "weather",
             cmdStrings: ["weather", "show me the weather", "get the weather", "can I see the weather", "can I see the weather for %?%", "weather for %?%", "weather in %?%"],
@@ -66,15 +67,12 @@ module.exports = {
                 param = param == undefined ? 63130 : param;
                 // make api call and get weather
                 let requestString = config.APIKeys.openweathermap;
-                console.log(parseInt(param));
                 if (isNaN(param)) {
                     requestString = config.APIStrings.openweathermapcity + requestString;
                 } else {
-                    // ###TODO: Fix, is currently only accepting zip ocdes, errors on cities and never gets here
                     requestString = config.APIStrings.openweathermapzip + requestString;
                 }
                 requestString = requestString.replace("%?%", param);
-                console.log(requestString);
                 let responseData = {
                     "condition": null,
                     "temperature": null,
@@ -90,7 +88,6 @@ module.exports = {
                     responseData.humidity = body.main.humidity;
                     responseData.wind = body.wind.speed;
                     responseData.windDirection = "N"; //TODO: fix this if we care?
-                    console.log(responseData);
                     return {
                         params: responseData
                     }
@@ -113,7 +110,11 @@ module.exports = {
                 const returnVals = ["Welcome, " + activeUser, "Hello " + activeUser + ". It's nice to see you today", "Welcome back!"];
                 return {
                     params: {
-                        "text": returnVals[Math.floor(Math.random() * returnVals.length)]
+                        "text": returnVals[Math.floor(Math.random() * returnVals.length)],
+                        "audioOptions": {
+                            shouldOutput: true,
+                            property: "text"
+                        }
                     }
                 };
             },
@@ -145,7 +146,11 @@ module.exports = {
                 fs.writeFileSync('./userData.json', JSON.stringify(content));
                 return {
                     params: {
-                        "text": "I will remember " + param
+                        "text": "I will remember " + param,
+                        "audioOptions": {
+                            shouldOutput: true,
+                            property: "text"
+                        }
                     }
                 };
             },
@@ -202,7 +207,12 @@ module.exports = {
                 }
                 return {
                     params: {
-                        duration: duration
+                        duration: duration,
+                        text: "timer set for " + param,
+                        "audioOptions": {
+                            shouldOutput: true,
+                            property: "text"
+                        }
                     }
                 }
             },
@@ -242,7 +252,11 @@ module.exports = {
                 fs.writeFileSync('./userData.json', JSON.stringify(content));
                 return {
                     params: {
-                        text: didDelete ? "Okay, I will forget\n" + param + "\nfor you" : "You have not asked me to remember \n" + param
+                        text: didDelete ? "Okay, I will forget\n" + param + "\nfor you" : "You have not asked me to remember \n" + param,
+                        "audioOptions": {
+                            shouldOutput: true,
+                            property: "text"
+                        }
                     }
                 };
                 
@@ -282,7 +296,7 @@ module.exports = {
         // TESTED, GTG (remove for empty?)
         {
             name: "departure",
-            cmdStrings: ["turn off", "goodbye", "bye %$%"],
+            cmdStrings: ["turn off", "goodbye %$%", "bye %$%"],
             keywords: ["bye", "off", "shutdown"],
             trigger: (param, activeUser) => {
                 // TODO: triger voice off?
@@ -313,6 +327,7 @@ module.exports = {
             viewName: "textDisplay"
         },
         //stock portfolio
+        // TESTED, GTG
         {
             name: "stock",
             cmdStrings: ["%$% stock overview"],
@@ -365,18 +380,56 @@ module.exports = {
             viewName: "stockOverview"
         },
         //single stock
+        // TESTED, GTG
         {
             name: "single stock",
-            cmdStrings: [],
+            cmdStrings: ["show me stock data for %?%", "what does the stock of %?% look like", "stock %$% for %?%"],
             keywords: [],
             trigger: (param, activeUser) => {
-                return {
-                    params: {
-                        
+                console.log('grabbing stock data for ' + param);
+                let res = request('GET', config.APIStrings.alphavantage.replace("%?%", param) + config.APIKeys.alphavantage);
+                const data = JSON.parse(res.getBody());
+                if ("Error Message" in data) {
+                    return {
+                        error: "Sorry, no stock data could be found for " + param
+                    }
+                } else {
+                    let viewData = {
+                        title: data["Meta Data"]["2. Symbol"],
+                        data: [],
+                        labels: []
+                    };
+                    let hasChange = false;
+                    for (let key in data["Time Series (Daily)"]) {
+                        // on first time through, create a +/- header for the graph based on today's open vs. current performance
+                        if (hasChange == false) {
+                            let change = Number(data["Time Series (Daily)"][key]["4. close"]) - Number(data["Time Series (Daily)"][key]["1. open"]);
+                            if (change >= 0) {
+                                viewData.title += " \u25B2 " + Math.round(change * 100) / 100;
+                            } else {
+                                viewData.title += " \u25BC " + Math.round(Math.abs(change) * 100) / 100;
+                            }
+                            hasChange = true;
+                        }
+                        let item = {
+                            x: Date.parse(key),
+                            y: Number(data["Time Series (Daily)"][key]["4. close"])
+                        };
+                        viewData.data.push(item);
+                        viewData.labels.push(key);
+                    }
+                    // must flip order of labels so that they run old-new for the graphing API
+                    viewData.data = viewData.data.reverse();
+                    viewData.labels = viewData.labels.reverse();
+                    
+                    return {
+                        params: {
+                            stockData: viewData
+                        }
                     }
                 }
             },
-            viewName: ""
+            viewName: "stock"
         },
         //lamp
         {

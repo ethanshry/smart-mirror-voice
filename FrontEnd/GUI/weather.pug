@@ -1,6 +1,14 @@
 Weather 
     include Mixins/socket.pug
     include Mixins/stylePackage.pug
+    // 
+        params: {
+            "condition": null,
+            "temperature": null,
+            "humidity": null,
+            "wind": null,
+            "windDirection": null
+        }
     html
         body
             div.header Welcome to the WEATHER Page!

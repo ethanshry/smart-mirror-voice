@@ -1,6 +1,13 @@
 TextDisplay 
     include Mixins/socket.pug
     include Mixins/stylePackage.pug
+    //
+        Imput: {
+            params: {
+                    text: "text",
+                    source (optional): "source"
+                }
+        }
     html
         body
             div #{params.text} 

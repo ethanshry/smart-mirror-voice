@@ -1,6 +1,18 @@
 Main 
     include Mixins/socket.pug
     include Mixins/stylePackage.pug
+    // 
+        params: {
+            stockData:
+                stockSeries: [
+                    {
+                        title: title,
+                        data: data,
+                        labels: labels
+                    },
+                    {etc...}
+                ]
+        }
     html
         body
         div.viewWrapper

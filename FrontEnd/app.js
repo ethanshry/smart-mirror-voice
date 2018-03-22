@@ -63,39 +63,49 @@ let wsServer = ws.createServer(function (conn) {
 		console.log("Received "+str)
 		// sentData = str;
 		const newData = processRecievedWebsocketData(str);
-		if (newData.cmd == 'audiooutrequest') {
-			// audiooutrequest should return an audiooutresponse
-			if (globalData.audioAwaitingOutput != "") {
-				sendData(formatOutgoingWebsocketData('audiooutresponse', globalData.audioAwaitingOutput));
-				globalData.audioAwaitingOutput = "";
-			} else {
-				sendData(formatOutgoingWebsocketData('audiooutresponse', 'noresponse'));
-			}
-		} else if (newData.cmd == 'clientpassthrough') {
-			// client only expects page requests, clientpassthrough should return pageselectrequest
-			sendData(formatOutgoingWebsocketData('pageselectrequest', newData.packet));
-		} else if (newData.cmd == 'lightrequest') {
-			// ###TODO: Complete arduino integration
-			sendLightSignal(newData.packet);
-		} else if (newData.cmd == 'shouldswitchuserrequest') {
-			// shouldswitchuserrequest should return an shouldswitchuserresponse
-			// expects noswitch if not active, username:hotwordA,hotwordB,... if active
-			if (globalData.shouldUpdateUser) {
-				globalData.shouldUpdateUser = false;
-				let content = JSON.parse(fs.readFileSync('./userData.json'));
-				let userString = globalData.activeUser + ':' + content.users[globalData.activeUser].hotwords.join(',');
-				sendData(formatOutgoingWebsocketData('shouldswitchuserresponse', userString));
-			} else {
-				sendData(formatOutgoingWebsocketData('shouldswitchuserresponse', 'noswitch'));
-			}
-		} else if (newData.cmd == 'activestatusrequest') {
-			// activestatusrequest should return an activestatusresponse
-			// expects n if not active, anything else if active
-			if (globalData.mirrorIsActive) {
-				sendData(formatOutgoingWebsocketData('activestatusresponse', 'y'));
-			} else {
-				sendData(formatOutgoingWebsocketData('activestatusresponse', 'n'));
-			}
+		switch(newData.cmd) {
+			case 'audiooutrequest':
+				// audiooutrequest should return an audiooutresponse
+				if (globalData.audioAwaitingOutput != "") {
+					sendData(formatOutgoingWebsocketData('audiooutresponse', globalData.audioAwaitingOutput));
+					globalData.audioAwaitingOutput = "";
+				} else {
+					sendData(formatOutgoingWebsocketData('audiooutresponse', 'noresponse'));
+				}
+				break;
+
+			case 'clientpassthrough':
+				// client only expects page requests, clientpassthrough should return pageselectrequest
+				sendData(formatOutgoingWebsocketData('pageselectrequest', newData.packet));
+				break;
+
+			case 'lightrequest':
+				// ###TODO: Complete arduino integration
+				sendLightSignal(newData.packet);
+				break;
+
+			case 'shouldswitchuserrequest':
+				// shouldswitchuserrequest should return an shouldswitchuserresponse
+				// expects noswitch if not active, username:hotwordA,hotwordB,... if active
+				if (globalData.shouldUpdateUser) {
+					globalData.shouldUpdateUser = false;
+					let content = JSON.parse(fs.readFileSync('./userData.json'));
+					let userString = globalData.activeUser + ':' + content.users[globalData.activeUser].hotwords.join(',');
+					sendData(formatOutgoingWebsocketData('shouldswitchuserresponse', userString));
+				} else {
+					sendData(formatOutgoingWebsocketData('shouldswitchuserresponse', 'noswitch'));
+				}
+				break;
+
+			case 'activestatusrequest':
+				// activestatusrequest should return an activestatusresponse
+				// expects n if not active, anything else if active
+				if (globalData.mirrorIsActive) {
+					sendData(formatOutgoingWebsocketData('activestatusresponse', 'y'));
+				} else {
+					sendData(formatOutgoingWebsocketData('activestatusresponse', 'n'));
+				}
+				break;
 		}
 	})
 	conn.on("close", function (code, reason) {
@@ -106,6 +116,7 @@ let wsServer = ws.createServer(function (conn) {
 	conn.on("error", function (err) {
 		// MUST INCLUDE so that the socket server doesnt crash all the time
 		// see https://github.com/websockets/ws/issues/1256 for details
+		// Also will sporadically call for no apparent reason with no impact- just ignore it
 		console.log('erroring out');
 	})
  }).listen(Config.websocketServerPort)
@@ -153,11 +164,15 @@ app.get('/nav/:cmd', (req, res) => {
 	} else {
 		let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param, globalData.activeUser);
 		console.log(paramData);
-		if ("audioOptions" in paramData.params && paramData.params.audioOptions.shouldOutput) {
-			globalData.audioAwaitingOutput = paramData.params[paramData.params.audioOptions.property];
+		if ("error" in paramData) {
+			res.render('textView', {params: { text: paramData.error}});
+		} else {
+			if ("audioOptions" in paramData.params && paramData.params.audioOptions.shouldOutput) {
+				globalData.audioAwaitingOutput = paramData.params[paramData.params.audioOptions.property];
+			}
+			console.log("audio:" + globalData.audioAwaitingOutput);
+			res.render(voiceCommandLibrary.commands[commandData.commandIndex].viewName, paramData);
 		}
-		console.log("audio:" + globalData.audioAwaitingOutput);
-		res.render(voiceCommandLibrary.commands[commandData.commandIndex].viewName, paramData);
 	}
 	//res.render('error');
 });

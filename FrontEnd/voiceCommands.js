@@ -48,6 +48,8 @@ module.exports = {
                             property: "propContainingAudioText"
                         }
                     }
+                    // as alternate, if your trigger experiences an error, can return
+                    error: "error message"
                 };
             },
             viewName: "name of .pug file which should be displayed as a result of this command i.e. stockView"
@@ -64,11 +66,12 @@ module.exports = {
                 param = param == undefined ? 63130 : param;
                 // make api call and get weather
                 let requestString = config.APIKeys.openweathermap;
-                if (parseInt(param) != NaN) {
-                    requestString = config.APIStrings.openweathermapzip + requestString;
+                console.log(parseInt(param));
+                if (isNaN(param)) {
+                    requestString = config.APIStrings.openweathermapcity + requestString;
                 } else {
                     // ###TODO: Fix, is currently only accepting zip ocdes, errors on cities and never gets here
-                    requestString = config.APIStrings.openweathermapcity + requestString;
+                    requestString = config.APIStrings.openweathermapzip + requestString;
                 }
                 requestString = requestString.replace("%?%", param);
                 console.log(requestString);
@@ -80,15 +83,19 @@ module.exports = {
                     "windDirection": null
                 };
                 let res = request('GET', requestString);
-                let body = JSON.parse(res.getBody());
-                responseData.condition = body.weather[0].main;
-                responseData.temperature = Math.round((9/5 * body.main.temp - 273.15) + 32);
-                responseData.humidity = body.main.humidity;
-                responseData.wind = body.wind.speed;
-                responseData.windDirection = "N"; //TODO: fix this if we care?
-                console.log(responseData);
-                return {
-                    params: responseData
+                if (res.responseCode != 404) {
+                    let body = JSON.parse(res.getBody());
+                    responseData.condition = body.weather[0].main;
+                    responseData.temperature = Math.round((9/5 * body.main.temp - 273.15) + 32);
+                    responseData.humidity = body.main.humidity;
+                    responseData.wind = body.wind.speed;
+                    responseData.windDirection = "N"; //TODO: fix this if we care?
+                    console.log(responseData);
+                    return {
+                        params: responseData
+                    }
+                } else {
+
                 }
             },
             viewName: "weather"
@@ -344,7 +351,7 @@ module.exports = {
         },
         //single stock
         {
-            name: "",
+            name: "single stock",
             cmdStrings: [],
             keywords: [],
             trigger: (param, activeUser) => {
@@ -371,35 +378,57 @@ module.exports = {
             viewName: ""
         },
         //iOT IP set
+        // DONE, UNTESTED
         {
-            name: "",
-            cmdStrings: [],
+            name: "set ip",
+            cmdStrings: ["set lamp ip to %?%"],
             keywords: [],
             trigger: (param, activeUser) => {
+                const conversions = {
+                    "one": 1,
+                    "two": 2,
+                    "three": 3,
+                    "four": 4,
+                    "five": 5,
+                    "six": 6,
+                    "seven": 7,
+                    "eight": 8,
+                    "nine": 9,
+                    "point": ".",
+                    " ": ""
+                }
+                console.log(param);
+                Object.keys(conversions).forEach((key) => {
+                    param = param.split(key).join(conversions[key]);
+                });
+
                 return {
                     params: {
-                        
+                        text: "IP set to " + param
                     }
                 }
             },
-            viewName: ""
+            viewName: "textDisplay"
         },
         //wiki webcrawler
         //TESTED, GTG (ish)
+        // would love to put a lot more time into web scraping- wonder if brain.js would be useful here
         {
             name: "wikipedia",
-            cmdStrings: ["who is %?%", "what is %?%", "where is %?%", "wiki search %?%"],
+            cmdStrings: ["who is %?%", "what is %?%", "where is %?%", "wiki search %?%", "what are %?%"],
             keywords: [],
             trigger: (param, activeUser) => {
-                console.log("requestinig");
                 const queryString = "https://en.wikipedia.org/wiki/" + param.replace("/ /g ", "_");
                 let res = request('GET', queryString);
-                const $ = cheerio.load(res.getBody());
-                let text = $('.mw-parser-output>p').first().text();
+                let text = "Sorry, an error occured. We couldn't find data on " + param;
+                if (res.statusCode != 404) {
+                    const $ = cheerio.load(res.getBody());
+                    text = $('.mw-parser-output>p').first().text();
+                }
                 return {
                     params: {
                         text: text,
-                        source: "wikipedia.org"
+                        source: 'wikipedia.org'
                     }
                 }
             },

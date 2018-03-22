@@ -1,7 +1,24 @@
+/*
+    commandParser.js
+
+    Last Updated- EthanShry 20180321
+
+    Class to process input data (STT String) to a command in ./voiceCommands.js
+
+*/
+
+// gotta love OO JS lol
 function CommandParser(commandList) {
     this.commandList = commandList;
 }
 
+// still lovin OO JS
+/*
+    General Approach-
+        Iterate through each command string in ./voiceCommands.js, check for match considering %$% whitelist and %?% params
+        If no match, iterate through keywords for each command in ./voiceCommands.js to see if a keyword matches
+        If we have a match, return the index of the command, as well as the param parsed out by the command parser.
+*/
 CommandParser.prototype.getCommandForString = function(str) {
     str = str.toLowerCase();
     let matchFlag = false;

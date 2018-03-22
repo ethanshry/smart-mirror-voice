@@ -1,3 +1,12 @@
+'''
+    pyWsRecvTest.py
+    Last Updated- EthanShry 20180321
+
+    Mimics the way ../HardwareInterface/voiceRecognizer.py processes incoming WS messages
+    Testing the check-response websocket workflow
+
+'''
+
 import json
 import requests
 import time

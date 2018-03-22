@@ -1,3 +1,12 @@
+'''
+    wsTest.py
+    Last Updated- EthanShry 20180321
+
+    Websocket Server Test code in python
+    ###TODO: Delete, no need for this in current implementation
+
+'''
+
 import websocket 
 #import create_connection
 #ws = create_connection("ws://localhost:8080/websocket")

@@ -1,3 +1,12 @@
+/*
+    app.js
+
+    Last Updated- EthanShry 20180321
+
+    Main js file- handles HTTP Server, Websocket Server, Serial Communication...
+
+*/
+
 // Server Imports
 let express = require('express');
 let app = express();
@@ -189,6 +198,7 @@ async function writeSerial(serialSends) {
 	}
 }
 
+// sexy async js
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }

@@ -1,3 +1,12 @@
+/*
+    config.js
+
+    Last Updated- EthanShry 20180321
+
+    Has App-level config data, i.e. preferred port data, API keys, etc
+
+*/
+
 module.exports = {
     guiServerPort: 3000,
     websocketServerPort: 8080,

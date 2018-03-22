@@ -1,3 +1,13 @@
+/*
+    voiceCommands.js
+
+    Last Updated- EthanShry 20180321
+
+    Collection of all the commands, command strings, and command trigger functions used by the mirror.
+    New command template is below
+
+*/
+
 let request = require('sync-request');
 let twitterAPI = require('twitter');
 
@@ -14,10 +24,19 @@ module.exports = {
     command template
     {
             name: "descriptive name, only for coder use",
-            cmdStrings: ["list of strings. Can make use of %?% for parameter, %#% for continuous whitelist character sequence. Max 1 of each per command"],
+            // NOTE: cmdStrings are checked left to right, so if you wish to prefer one then place it in lower array index
+            cmdStrings: [
+                "list of strings
+                Can make use of %?% for parameter
+                Can make use of %$% for continuous whitelist character sequence
+                Max 1 of each per command
+                Must have seperator for %?% and %$%. i.e. %$% timer for %?% is valid, timer %$% %?% is not valid"
+                ],
+            // note, keyword will match to command if STT input contains the keyword, therefore MUST NOT overlap with possible keyword for any other command
             keywords: ["keyword list. should be unique to only this command- idea is if no cmdString matches for any command, will loop back to look for keyword in command. no %?% or %#% allowed"],
             trigger: (param, activeUser) => {
                 // if your cmdString had a %?% in it, will be passed in as param.
+                // MUST RETURN {params:{}} at a minimum
                 return {
                     // all UIs expect data in this form
                     params: {
@@ -31,7 +50,7 @@ module.exports = {
                     }
                 };
             },
-            viewName: "name of .pug file which should be displayed as a result of this command"
+            viewName: "name of .pug file which should be displayed as a result of this command i.e. stockView"
         },
 
     */

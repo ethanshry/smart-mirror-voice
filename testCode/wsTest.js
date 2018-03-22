@@ -1,3 +1,11 @@
+/*
+    wsTest.js
+    Last Updated- EthanShry 20180321
+
+    JS Websocket Server test code 
+
+*/
+
 var ws = require("nodejs-websocket")
 
 // Scream server example: "hi" -> "HI!!!" 

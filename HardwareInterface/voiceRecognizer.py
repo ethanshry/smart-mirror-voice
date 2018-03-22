@@ -1,4 +1,12 @@
+'''
+    voiceRecognizer.py
+    Last Updated- EthanShry 20180321
 
+    Runs in the aiy/src/voice/examples folder
+
+    Handles speech input and STT processing, audio output, and monitors active user profile and mirror is active status
+
+'''
 # pylint: disable=E0401
 import aiy.audio
 import aiy.cloudspeech

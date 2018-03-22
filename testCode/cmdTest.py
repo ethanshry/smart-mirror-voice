@@ -1,3 +1,11 @@
+'''
+    cmdTest.py
+    Last Updated- EthanShry 20180321
+
+    Mimics the way ../HardwareInterface/voiceRecognizer.py sends text commands to the client
+
+'''
+
 import json
 import requests
 import time

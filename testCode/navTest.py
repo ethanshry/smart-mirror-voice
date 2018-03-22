@@ -1,3 +1,11 @@
+'''
+    navTest.py
+    Last Updated- EthanShry 20180321
+
+    Test code for websocket client connection
+
+'''
+
 from websocket import create_connection
 import time
 ws = create_connection("ws://localhost:8080/websocket")

@@ -331,7 +331,7 @@ module.exports = {
         {
             name: "stock",
             cmdStrings: ["%$% stock overview"],
-            keywords: [""],
+            keywords: [],
             trigger: (param, activeUser) => {
                 // construct data outline:
                 let returnVal = {

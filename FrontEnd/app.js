@@ -18,10 +18,6 @@ let server = require('http').createServer(app);
 // Hardware Interface Imports
 let SerialPort = require('serialport');
 
-//API Imports
-let request = require('request');
-let twitterAPI = require('twitter');
-
 // File System Imports
 let fs = require('fs');
 
@@ -165,7 +161,23 @@ app.get('/nav/:cmd', (req, res) => {
 	} else {
 		let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param, globalData.activeUser);
 		console.log(paramData);
-		if ("error" in paramData) {
+		// let p = new Promise();
+		if (paramData instanceof Promise) {
+			console.log('in the promise');
+			paramData.then((pData) => {
+				console.log(pData);
+				throw "Woahhhh chill";
+				if ("error" in paramData) {
+					res.render('textDisplay', {params: { text: paramData.error}});
+				} else {
+					if ("audioOptions" in paramData.params && paramData.params.audioOptions.shouldOutput) {
+						globalData.audioAwaitingOutput = paramData.params[paramData.params.audioOptions.property];
+					}
+					console.log("audio:" + globalData.audioAwaitingOutput);
+					res.render(voiceCommandLibrary.commands[commandData.commandIndex].viewName, paramData);
+				}
+			});
+		} else if ("error" in paramData) {
 			res.render('textDisplay', {params: { text: paramData.error}});
 		} else {
 			if ("audioOptions" in paramData.params && paramData.params.audioOptions.shouldOutput) {
@@ -237,31 +249,3 @@ function sendLightSignal(signalKey) {
 			break;
 	}
 }
-
-// ###TODO: Remove from final project
-app.get('/api/:test', (req, res) => {
-	console.log(req.params.test);
-	switch (req.params.test) {
-		case 'twitter':
-			let caller = new twitterAPI({
-				consumer_key: Config.APIKeys.twitter.consumerKey,
-				consumer_secret: Config.APIKeys.twitter.consumerSecret,
-				access_token_key: Config.APIKeys.twitter.accessToken,
-				access_token_secret: Config.APIKeys.twitter.accessTokenSecret
-			});
-			caller.get('search/tweets', {q: 'victory'}, (error, tweets, response) => {
-				tweets.statuses.forEach((tweet, index) => {
-					tweets.statuses[index] = {
-						text: tweet.text,
-						timestamp: tweet.created_at,
-						user: tweet.user
-					}
-				});
-				console.log(tweets);
-			});
-			break;
-		default:
-			break;
-	}
-	res.render('error');
-});

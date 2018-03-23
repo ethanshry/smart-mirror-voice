@@ -15,10 +15,9 @@
                 "susan"
             ],
             "rememberedItems": [
-                "feed me toast",
-                "buy a book",
                 "to take out the trash",
-                "buy fishing gear"
+                "buy fishing gear",
+                "feed me toast"
             ],
             "colorProfile": {
                 "main": "#0000FF",
@@ -26,31 +25,33 @@
                 "accent2": "#bb00FF"
             }
         },
-        "tony": {"importantStocks": [
-            "WMT",
-            "GE",
-            "PG",
-            "GOOGL",
-            "AAPL",
-            "TWTR"
-        ],
-        "hotwords": [
-            "tina",
-            "simon",
-            "leroy"
-        ],
-        "rememberedItems": [
-            "new phone who dis",
-            "rabbit rabbit",
-            "buy the fruitcake",
-            "eat the fruitcake",
-            "be the fruitcake"
-        ],
-        "colorProfile": {
-            "main": "#0000FF",
-            "accent1": "#FF00FF",
-            "accent2": "#bb00FF"
-        }},
+        "tony": {
+            "importantStocks": [
+                "WMT",
+                "GE",
+                "PG",
+                "GOOGL",
+                "AAPL",
+                "TWTR"
+            ],
+            "hotwords": [
+                "tina",
+                "simon",
+                "leroy"
+            ],
+            "rememberedItems": [
+                "new phone who dis",
+                "rabbit rabbit",
+                "buy the fruitcake",
+                "eat the fruitcake",
+                "be the fruitcake"
+            ],
+            "colorProfile": {
+                "main": "#0000FF",
+                "accent1": "#FF00FF",
+                "accent2": "#bb00FF"
+            }
+        },
         "kevin": {}
     }
 }

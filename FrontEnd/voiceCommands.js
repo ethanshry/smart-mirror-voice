@@ -162,32 +162,81 @@ module.exports = {
             cmdStrings: ["open twitter", "%$% my twitter feed", "%$% top tweets", "tweets about %?%"],
             keywords: ["twitter", "tweets"],
             trigger: (param, activeUser) => {
-                // TODO: return twitter info
-                let caller = new twitterAPI({
-                    consumer_key: config.APIKeys.twitter.consumerKey,
-                    consumer_secret: config.APIKeys.twitter.consumerSecret,
-                    access_token_key: config.APIKeys.twitter.accessToken,
-                    access_token_secret: config.APIKeys.twitter.accessTokenSecret
-                });
-                caller.get('search/tweets', {q: param}).then( (error, tweets, response) => {
-                    tweets.statuses.forEach((tweet, index) => {
-                        tweets.statuses[index] = {
-                            text: tweet.text,
-                            timestamp: tweet.created_at,
-                            user: tweet.user.name
-                        }
+                if (!param) {
+                    param = "trending%20now";
+                }
+                let tRes = request('GET', config.APIStrings.twitter.replace("%?%", param));
+                if (tRes.statusCode == 200) {
+                    const $ = cheerio.load(tRes.getBody());
+                    // SCRAPE
+                    let fullnames = [];
+                    let handles = [];
+                    let timestamps = [];
+                    let textContents = [];
+                    
+                    $(".content .fullname").each((index, elem) => {
+                        fullnames[index] = $(elem).text();
                     });
-                    console.log(tweets);
-                    //console.log(tweets.statuses[0].user);
+                    $(".content .username").each((index, elem) => {
+                        handles[index] = $(elem).text();
+                    });
+                    $(".content ._timestamp").each((index, elem) => {
+                        timestamps[index] =  $(elem).text();
+                    });
+                    $(".content .tweet-text").each((index, elem) => {
+                        let text = $(elem).text();
+                        // remove http urls from tweets
+                        if (text.indexOf('http://') != -1 || text.indexOf('https://') != -1) {
+                            const urlStart = text.indexOf('http');
+                            const textPieces = text.split('http');
+                            let urlEnd = textPieces[1].indexOf(' ');
+                            if (urlEnd == -1) {
+                                // no space after url, just take initial piece
+                                text = textPieces[0];
+                            } else {
+                                urlEnd += textPieces[0].length;
+                                text = text.substring(urlStart, urlEnd + 1);
+                            }
+                        }
+                        // remove pic.twitter.com links
+                        if (text.indexOf('pic.') != -1) {
+                            const urlStart = text.indexOf('pic.');
+                            const textPieces = text.split('pic.');
+                            let urlEnd = textPieces[1].indexOf(' ');
+                            if (urlEnd == -1) {
+                                // no space after url, just take initial piece
+                                text = textPieces[0];
+                            } else {
+                                urlEnd += textPieces[0].length;
+                                text = text.substring(urlStart, urlEnd + 1);
+                            }
+                        }
+                        textContents[index] = text
+                    });
+                    let fullTweets = [];
+                    for (let index in fullnames) {
+                        fullTweets.push({
+                            name: fullnames[index],
+                            handle: handles[index],
+                            timestamp: timestamps[index],
+                            text: textContents[index]
+                        });
+                        
+                    }
                     return {
-                        params: tweets
-                    };
-                }); 
+                        params: fullTweets
+                    }
+                } else {
+                    return {
+                        error: "Couldn't find tweets about " + param
+                    }
+                }
             },
             viewName: "twitter"
         },
         //timer
         //TESTED, GTG
+        // FIXAUTO
         {
             name: "timer",
             cmdStrings: ["%$% timer for %?%"],

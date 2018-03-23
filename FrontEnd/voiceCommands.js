@@ -1,7 +1,7 @@
 /*
     voiceCommands.js
 
-    Last Updated- EthanShry 20180321
+    Last Updated- EthanShry 20180323
 
     Collection of all the commands, command strings, and command trigger functions used by the mirror.
     New command template is below
@@ -74,6 +74,7 @@ module.exports = {
                 }
                 requestString = requestString.replace("%?%", param);
                 let responseData = {
+                    "location": param,
                     "condition": null,
                     "temperature": null,
                     "humidity": null,

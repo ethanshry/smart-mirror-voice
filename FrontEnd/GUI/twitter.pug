@@ -1,19 +1,69 @@
-Twitter 
+Twitter
     include Mixins/socket.pug
     include Mixins/stylePackage.pug
-    // IN PROGRESS- DO NOT TOUCH
+
+    doctype html
     html
-        body
-            
+        body(style='background-color:black;')
+        div.header Tweets about #{params.query}
+        div#tweetList
+            for tweet in params.tweets
+                div.tweet
+                    div.header 
+                        strong #{tweet.username} 
+                        span.handle #{tweet.handle}
+                        span.timestamp #{tweet.timestamp}
+                    div.text #{tweet.text}
+
     style.
-        body {
-            font-size: 1.3rem;
-        }
+
         .header {
-            width: 100vw;
-            height: 10vh;
             text-align: center;
-            font-size: 20px;
+            font-size: 3em;
+            margin: 20px;
         }
+
+        .tweet {
+            margin: 30px;
+            border-bottom: 1px solid white;
+            padding-bottom: 30px;
+        }
+
+        .tweet .header {
+            font-size: 2.2em;
+            text-align: left;
+        }
+
+        .tweet .header .timestamp {
+            float: right;
+            color: gray;
+        }
+
+        .tweet .header .handle {
+            color: gray;
+        }
+
+        .tweet .text {
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        #tweetList {
+            overflow-y: hidden;
+            height: 1540px;
+        }
+    
+    script.
+        function updateScroll() {
+            let list = document.getElementById("tweetList");
+            if (list.scrollHeight > 1520) {
+                if (list.scrollTop < list.scrollHeight - 1520) {
+                    list.scrollTop += 1;
+                }
+            }
+        }
+
+        setInterval(updateScroll, 25);
+
     +socketScript()
     +stylePackage()

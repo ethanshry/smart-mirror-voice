@@ -1,25 +1,38 @@
-Remind 
+Remind
     include Mixins/socket.pug
     include Mixins/stylePackage.pug
-    // 
-        params: {
-                "items": content.users[activeUser].rememberedItems
-            }
-    html
-        body
-            ul.itemList
+    
+    body
+        div.header Reminders
+        div.list
             for item in params.items
-                li #{item}
+                div.item #{item[0].toUpperCase() + item.substring(1)}
 
     style.
-        body {
-            font-size: 1.3rem;
-        }
         .header {
-            width: 100vw;
-            height: 10vh;
             text-align: center;
-            font-size: 20px;
+            font-size: 5em;
+            border-bottom: 2px solid white;
+            padding-bottom: 15px;
+            margin: 10px auto;
         }
+
+        .list {
+            display: flex;
+            flex-direction: column;
+            justify-content: start;
+            height: 100%;
+            margin-top: 60px;
+        }
+
+        .item {
+            border-bottom: 1px solid white;
+            margin: 30px;
+            margin-top: 0px;
+            padding-bottom: 30px;
+            font-size: 2.7em;
+            text-align: center;
+        }
+
     +socketScript()
     +stylePackage()

@@ -1,8 +1,4 @@
-Time
-    include Mixins/socket.pug
-    include Mixins/stylePackage.pug
-
-    body
+mixin timeWidget()
 
     div.widgetWrapper
         div#dayOfWeek
@@ -30,19 +26,17 @@ Time
             height: 100%;
         }
         #dayOfWeek {
-            font-size: 7em;
+            font-size: 3em;
             text-align: justify;
             margin: 10px auto;
         }
         #month {
-            font-size: 4em;
+            font-size: 1.5em;
             text-align: justify;
             margin: 1px auto;
         }
         #time {
-            font-size: 13em;
+            font-size: 5em;
             text-align: justify;
             margin: 10px auto;
         }
-    +socketScript()
-    +stylePackage()

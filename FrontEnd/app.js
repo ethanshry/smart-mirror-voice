@@ -187,7 +187,6 @@ app.get('/nav/:cmd', (req, res) => {
 			res.render(voiceCommandLibrary.commands[commandData.commandIndex].viewName, paramData);
 		}
 	}
-	//res.render('error');
 });
 
 /*

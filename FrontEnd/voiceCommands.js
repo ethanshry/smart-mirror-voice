@@ -9,7 +9,6 @@
 */
 
 let request = require('sync-request');
-let twitterAPI = require('twitter');
 //used for wikipedia API body parsing
 let cheerio = require('cheerio');
 
@@ -82,10 +81,11 @@ module.exports = {
                     "windDirection": null
                 };
                 let res = request('GET', requestString);
-                if (res.responseCode == 200) {
+                console.log(res);
+                if (res.statusCode == 200) {
                     let body = JSON.parse(res.getBody());
                     responseData.condition = body.weather[0].main;
-                    responseData.temperature = Math.round((9/5 * body.main.temp - 273.15) + 32);
+                    responseData.temperature = Math.round((9/5 * (body.main.temp - 273.15)) + 32);
                     responseData.humidity = body.main.humidity;
                     responseData.wind = body.wind.speed;
                     responseData.windDirection = "N"; //TODO: fix this if we care?
@@ -217,7 +217,7 @@ module.exports = {
                     let fullTweets = [];
                     for (let index in fullnames) {
                         fullTweets.push({
-                            name: fullnames[index],
+                            username: fullnames[index],
                             handle: handles[index],
                             timestamp: timestamps[index],
                             text: textContents[index]
@@ -225,7 +225,10 @@ module.exports = {
                         
                     }
                     return {
-                        params: fullTweets
+                        params: {
+                            query: param,
+                            tweets: fullTweets
+                        }
                     }
                 } else {
                     return {
@@ -240,8 +243,8 @@ module.exports = {
         // FIXAUTO
         {
             name: "timer",
-            cmdStrings: ["%$% timer for %?%"],
-            keywords: ["timer"],
+            cmdStrings: ["timer for %?%", "%$% timer for %?%"],
+            keywords: [],
             trigger: (param, activeUser) => {
                 // process timer
                 const cmdPiece = param.split(" ");

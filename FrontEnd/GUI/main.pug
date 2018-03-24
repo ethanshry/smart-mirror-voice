@@ -1,33 +1,48 @@
 Main 
     include Mixins/socket.pug
     include Mixins/stylePackage.pug
+    include Mixins/timeWidget.pug
     // params: {
             "user": user,
             "hotwords": [hotword1, hotword2, etc]
         }
     html
         body
-            div.header Welcome to the Main Page!
-            div Welcome #{params.user}
-            div Reminder, your hotwords are: <br />
-                for item, index in params.hotwords
-                    if index + 1 != params.hotwords.length
-                        span #{item}, 
-                    else
-                        span and #{item} 
+            div.topPanelWrapper
+                div
+                div.timeWrapper
+                    +timeWidget()
+            div.main
+                div Welcome 
+                    strong #{params.user}
+                div Reminder, your hotwords are: <br />
+                    for item, index in params.hotwords
+                        if index + 1 != params.hotwords.length
+                            span #{item}, 
+                        else
+                            span and #{item}
             
     style.
-        body {
-            font-size: 1.7rem;
-            color: white;
-            background-color: black;
-            text-align: center;
+        .topPanelWrapper {
+            display: flex;
+            justify-content: space-between;
+            height: 20%;
         }
-        .header {
-            width: 100vw;
-            height: 10vh;
-            text-align: center;
-            font-size: 20px;
+
+        .timeWrapper {
+            display: flex;
+            justify-content: end;
+            width: 40%;
         }
+
+        .main {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 4em;
+            text-align: center;
+            margin-top: 20%;
+        }
+
     +socketScript()
     +stylePackage()

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=mirrorlaunch
+Type=Application
+Path=/home/pi/Desktop/mirrorCode/HardwareInterface/AutoBoot
+Exec=lxterminal -e 'init.sh'
+Terminal=false

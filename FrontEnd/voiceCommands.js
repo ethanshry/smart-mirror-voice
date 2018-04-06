@@ -60,7 +60,9 @@ module.exports = {
         // tested, GTG
         {
             name: "weather",
-            cmdStrings: ["weather", "show me the weather", "get the weather", "can I see the weather", "can I see the weather for %?%", "weather for %?%", "weather in %?%"],
+            // what is the weather in 77377
+            // camel case names in GUI
+            cmdStrings: ["weather", "show me the weather", "get the weather", "can I see the weather", "can I see the weather for %?%", "weather for %?%", "#$# weather in %?%"],
             keywords: ["weather"],
             trigger: (param, activeUser) => {
                 param = param == undefined ? 63130 : param;
@@ -90,7 +92,12 @@ module.exports = {
                     responseData.wind = body.wind.speed;
                     responseData.windDirection = "N"; //TODO: fix this if we care?
                     return {
-                        params: responseData
+                        params: responseData,
+                        audioOut: 'It is ' + responseData.temperature + " degrees and " + responseData.condition + " in " + responseData.location,
+                        "audioOptions": {
+                            shouldOutput: true,
+                            property: "audioOut"
+                        }
                     }
                 } else {
                     return {
@@ -125,6 +132,7 @@ module.exports = {
         //TESTED, GTG
         {
             name: "departure/empty",
+            // add "empty"
             cmdStrings: ["goodbye", "see you later", "have a %$% day", "bye", "clear", "off", "turn off", "sleep", "go to sleep"],
             keywords: ["bye", "clear"],
             trigger: (cmdString) => {
@@ -147,7 +155,7 @@ module.exports = {
                 fs.writeFileSync('./userData.json', JSON.stringify(content));
                 return {
                     params: {
-                        "text": "I will remember " + param,
+                        "text": "I will remember '" + param + "'",
                         "audioOptions": {
                             shouldOutput: true,
                             property: "text"
@@ -158,6 +166,7 @@ module.exports = {
             viewName: "textDisplay"
         },
         //twitter
+        // fix animation to match window.getNextanimationFrame
         {
             name: "twitter",
             cmdStrings: ["open twitter", "%$% my twitter feed", "%$% top tweets", "tweets about %?%"],
@@ -227,7 +236,12 @@ module.exports = {
                     return {
                         params: {
                             query: param,
-                            tweets: fullTweets
+                            tweets: fullTweets,
+                            audioOut: "Here are some tweets about " + param,
+                            "audioOptions": {
+                                shouldOutput: true,
+                                property: "audioOut"
+                            }
                         }
                     }
                 } else {
@@ -485,6 +499,7 @@ module.exports = {
             viewName: "stock"
         },
         //lamp
+        // ###V2TODO
         {
             name: "",
             cmdStrings: [],
@@ -500,6 +515,7 @@ module.exports = {
         },
         //iOT IP set
         // DONE, UNTESTED
+        // ###V2TODO
         {
             name: "set ip",
             cmdStrings: ["set lamp ip to %?%"],

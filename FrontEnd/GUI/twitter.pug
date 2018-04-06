@@ -61,9 +61,10 @@ Twitter
                     list.scrollTop += 1;
                 }
             }
+            window.requestAnimationFrame(updateScroll())
         }
-
-        setInterval(updateScroll, 25);
+        updateScroll();
+        // setInterval(updateScroll, 25);
 
     +socketScript()
     +stylePackage()

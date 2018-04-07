@@ -154,7 +154,7 @@ def main():
             sendWsMesage(formatOutgoingWsMsg(config["wsRequestStrings"]["client"],text))
             
             # maybe want this? idk?
-            sendWsMesage(formatOutgoingWsMsg(config["wsRequestStrings"]["light"],"clear"))
+            #sendWsMesage(formatOutgoingWsMsg(config["wsRequestStrings"]["light"],"clear"))
 
 if __name__ == '__main__':
     main()

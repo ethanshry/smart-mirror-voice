@@ -210,17 +210,22 @@ sp.on("close", () => {
 });
 
 sp.on("data", (data) => {
-	let bufferedData = new Buffer(data, 'utf');
+	// let bufferedData = new Buffer(data, 'utf');
+	let bufferedData = data.toString('utf-8');
 	console.log("Recieved Serial Data: " + bufferedData);
 	globalData.serialACK = 1;
 });
 
+//sp.send("0");
+
+// USED TO WRITE TO SERIAL WITH PARAMS ONLY
+// Note we expect "ACK" back from sending the mode and "K" back from each parameter, but we don't care that much so we're not going to check this
 async function writeSerial(serialSends) {
 	for (let i = 0; i < serialSends.length; i++) {
 		globalData.serialACK = 0;
 		sp.write(serialSends[i]);
 		while (!serialACK) {
-			await sleep(100);
+			await sleep(10);
 		}
 	}
 }
@@ -233,18 +238,38 @@ function sleep(ms) {
 /*
 	### Utility Methods ###
 */
+/*
+	LIGHT INFO:
+		Modes:
+			0 = off
+			1 = Breathing (requires params)
+			2 = Spiral Up
+			3 = Solid On (requires params)
+			4 = Fire
+			5 = Spasmy
+			6 = Breathe Blue
+			7 = Breahe Green
+			8 = Breathe Red
+			9 = Spiral Blue
+			10 = Spiral Red
+			11 = Spiral Green
+	params are: r,g,b,frame delay
+*/
 
 function sendLightSignal(signalKey) {
 	switch (signalKey.toLowerCase()) {
 		case 'clear':
+			sp.write("0");
 			break;
 		case 'hotwordtriggered':
+			sp.write("9");
 			break;
 		case 'thinking':
+			sp.write("6");
 			break;
 		default:
 			// confused signal
-			console.log('Trying to send light signal with unknown code, code: ' + signalKey.lower());
+			console.log('Trying to send light signal with unknown code, code: ' + signalKey.toLowerCase());
 			break;
 	}
 }

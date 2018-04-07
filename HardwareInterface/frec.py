@@ -14,7 +14,7 @@ cam = picam.PiCamera()
 cam.vflip = True
 cam.hflip = True
 
-cam.capture('Pictures/unknownFace.jpg')
+cam.capture('unknownFace.jpg')
 
 BUCKET = "tech-reflect-voice-facial-images"
 FACE_LIST = ["Ethan", "Anthony"]
@@ -24,7 +24,7 @@ IS_FACE = False
 MIN_SIM = 60.0
 
 s3 = boto3.client('s3')
-s3.upload_file('Pictures/unknownFace.jpg', Bucket=BUCKET, Key=KEY_TARGET)
+s3.upload_file('unknownFace.jpg', Bucket=BUCKET, Key=KEY_TARGET)
 
 
 def detect_face(bucket, key, region="us-east-2", attributes=['ALL']):

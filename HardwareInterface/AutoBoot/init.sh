@@ -1,22 +1,12 @@
+#!/bin/bash
 # file to autoboot the mirror to the correct location
 echo "Booting..."
 echo "Booting server..."
-lxeterminal -e "cd ../../FrontEnd && npm start"
+cd ~/Desktop/mirrorCode/HardwareInterface/AutoBoot
+lxterminal --command bash nodeInit.sh
 echo "Booting browser..."
-lxeterminal -e "stall.py && chromium-browser --kiosk http://localhost:3000"
+lxterminal --command bash voiceInit.sh
+python stall.py
+lxterminal --command chromium-browser --kiosk http://localhost:3000/nav/main
 
-cd ~/bin
-
-source /etc/bash.bashrc
-source ~/.bashrc
-cat /etc/aiyprojects.info
-
-cd ~/AIY-projects-python
-source env/bin/activate
-
-echo "Setup python environment"
-echo "Initializing Voice Recognizer..."
-
-cd ~/Desktop/mirrorCode/HardwareInterface
-python voiceRecognizer.py
-
+bash

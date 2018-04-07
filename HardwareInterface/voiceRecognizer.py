@@ -125,7 +125,7 @@ def main():
         print('Listening...')
         text = ""
         # would love to better break all this stuff up somehow
-        while (text == None) or any(hotword not in text.lower() for hotword in config["hotwordList"]):
+        while (text == None) or not any(hotword in text.lower() for hotword in config["hotwordList"]):
             if config["mirrorIsActive"] == False:
                 # will this delay anything? who knows man
                 isActiveCheck()

@@ -235,7 +235,7 @@ function sleep(ms) {
 */
 
 function sendLightSignal(signalKey) {
-	switch (signalKey.lower()) {
+	switch (signalKey.toLowerCase()) {
 		case 'clear':
 			break;
 		case 'hotwordtriggered':

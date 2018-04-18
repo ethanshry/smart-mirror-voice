@@ -196,9 +196,9 @@ app.get('/nav/:cmd', (req, res) => {
 			});
 		} else if ("error" in paramData) {
 			res.render('textDisplay', {params: { text: paramData.error}});
-		} else if ("hardware" in paramData) {
+		} else if ("hardware" in paramData.params) {
 			console.log('1');
-			if (paramData.hardware == "switchUser") {
+			if (paramData.params.hardware == "switchUser") {
 				console.log('2');
 				checkForUserThroughFacialRecognition();
 			} /*else if (paramData["hardware"] == "activeStatus") {

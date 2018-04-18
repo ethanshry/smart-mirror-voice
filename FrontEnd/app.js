@@ -336,9 +336,9 @@ function sendLightSignal(signalKey) {
 function changeUser(user) {
 	console.log("Changing user to: " + user);
 	let content = JSON.parse(fs.readFileSync('./userData.json'));
-	globalData.activeUser = user.toLowerCase() in content.users ? user : "default";
+	globalData.activeUser = user.toLowerCase() in content.users ? user.toLowerCase() : "default";
 	globalData.audioAwaitingOutput = "switching user to " + globalData.activeUser;
 	console.log("User changed to: " + globalData.activeUser);
 }
 
-changeUser("Ethan");
+//changeUser("Ethan");

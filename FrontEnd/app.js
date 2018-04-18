@@ -180,7 +180,9 @@ app.get('/nav/:cmd', (req, res) => {
 		} else if ("error" in paramData) {
 			res.render('textDisplay', {params: { text: paramData.error}});
 		} else if ("hardware" in paramData) {
-			if (paramData["hardware"] == "switchUser") {
+			console.log('1');
+			if (paramData.hardware == "switchUser") {
+				console.log('2');
 				checkForUserThroughFacialRecognition();
 			} /*else if (paramData["hardware"] == "activeStatus") {
 				checkForUserThroughFacialRecognition();
@@ -200,7 +202,7 @@ app.get('/nav/:cmd', (req, res) => {
 	### Serial Communication ###
 */
 
-let sp = new SerialPort("/dev/ttyACM0", {
+let sp = new SerialPort("/dev/ttyAMA0", {
 	baudRate: 115200
 });
 
@@ -250,7 +252,9 @@ function sleep(ms) {
 function checkForUserThroughFacialRecognition() {
 	let PythonShell = require('python-shell');
 	let testPy = new PythonShell('./facial-rec.py');
+	console.log('3');
 	testPy.on('message', (msg) => {
+		console.log('4');
 		console.log('Recieving Rekognition Data: ' + msg);
 		let dataPoints = msg.split(',');
 		for (let i = 0; i < dataPoints.length; i++) {

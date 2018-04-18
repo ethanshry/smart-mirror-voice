@@ -79,7 +79,7 @@ if(IS_FACE == True) :
        source_face, matches = compare_faces(BUCKET, FILENAME, BUCKET, KEY_TARGET)
        for match in matches:
           sim = match['Similarity']
-          print(sim)
+          #print(sim)
           message.append("simScore:" + sim)
           if (sim >= MIN_SIM) :
              message.append("user:" + face)

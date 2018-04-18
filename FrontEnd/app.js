@@ -276,7 +276,7 @@ function checkForUserThroughFacialRecognition() {
 		console.log('Recieving Rekognition Data: ' + msg);
 		let dataPoints = msg.split(',');
 		for (let i = 0; i < dataPoints.length; i++) {
-			let params = item[0].split(':');
+			let params = dataPoints[0].split(':');
 			if (params[0] == "faceDetected" && params[1] == "false") {
 				// no face detected, should say so
 				globalData.audioAwaitingOutput = "Sorry, we could not detect a face in view of the camera";

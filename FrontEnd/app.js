@@ -197,9 +197,7 @@ app.get('/nav/:cmd', (req, res) => {
 		} else if ("error" in paramData) {
 			res.render('textDisplay', {params: { text: paramData.error}});
 		} else if ("hardware" in paramData.params) {
-			console.log('1');
 			if (paramData.params.hardware == "switchUser") {
-				console.log('2');
 				checkForUserThroughFacialRecognition();
 			} /*else if (paramData["hardware"] == "activeStatus") {
 				checkForUserThroughFacialRecognition();
@@ -270,9 +268,7 @@ function sleep(ms) {
 function checkForUserThroughFacialRecognition() {
 	let PythonShell = require('python-shell');
 	let testPy = new PythonShell('./facial-rec.py');
-	console.log('3');
 	testPy.on('message', (msg) => {
-		console.log('4');
 		console.log('Recieving Rekognition Data: ' + msg);
 		let dataPoints = msg.split(',');
 		for (let i = 0; i < dataPoints.length; i++) {
@@ -284,6 +280,7 @@ function checkForUserThroughFacialRecognition() {
 			if (params[0] == "user" && params[1] != "undefined") {
 				// user is found! (in theory)
 				changeUser(params[1]);
+				return;
 			} else {
 				//user is undefined
 				globalData.audioAwaitingOutput = "Sorry, the user was not found in the image database";

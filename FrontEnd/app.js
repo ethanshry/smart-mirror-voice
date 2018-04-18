@@ -280,12 +280,11 @@ function checkForUserThroughFacialRecognition() {
 			if (params[0] == "user" && params[1] != "undefined") {
 				// user is found! (in theory)
 				changeUser(params[1]);
-				return;
-			} else {
-				//user is undefined
-				globalData.audioAwaitingOutput = "Sorry, the user was not found in the image database";
+				return null;
 			}
 		}
+		// if we get to this point, no user was found
+		globalData.audioAwaitingOutput = "Sorry, the user was not found in the image database";
 	});
 	testPy.end(() => {
 		console.log("Closing Camera Session");

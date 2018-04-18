@@ -39,7 +39,7 @@ app.use(bodyParser.json());
 
 // global content store
 const globalData = {
-	activeUser: "ethan",
+	activeUser: "default",
 	// start true so will update hotwords ASAP
 	shouldUpdateUser: true,
 	mirrorIsActive: true,
@@ -179,6 +179,13 @@ app.get('/nav/:cmd', (req, res) => {
 			});
 		} else if ("error" in paramData) {
 			res.render('textDisplay', {params: { text: paramData.error}});
+		} else if ("hardware" in paramData) {
+			if (paramData["hardware"] == "switchUser") {
+				checkForUserThroughFacialRecognition();
+			} /*else if (paramData["hardware"] == "activeStatus") {
+				checkForUserThroughFacialRecognition();
+			}*/
+			res.render(voiceCommandLibrary.commands[commandData.commandIndex].viewName, paramData);
 		} else {
 			if ("audioOptions" in paramData.params && paramData.params.audioOptions.shouldOutput) {
 				globalData.audioAwaitingOutput = paramData.params[paramData.params.audioOptions.property];
@@ -236,6 +243,37 @@ function sleep(ms) {
 }
 
 /*
+	### Faical Recognition Methods ###
+*/
+
+// I hate so much that im actually writing this method right now send help I feel like a bad developer
+function checkForUserThroughFacialRecognition() {
+	let PythonShell = require('python-shell');
+	let testPy = new PythonShell('./facial-rec.py');
+	testPy.on('message', (msg) => {
+		console.log('Recieving Rekognition Data: ' + msg);
+		let dataPoints = msg.split(',');
+		for (let i = 0; i < dataPoints.length; i++) {
+			let params = item[0].split(':');
+			if (params[0] == "faceDetected" && params[1] == "false") {
+				// no face detected, should say so
+				globalData.audioAwaitingOutput = "Sorry, we could not detect a face in view of the camera";
+			}
+			if (params[0] == "user" && params[1] != "undefined") {
+				// user is found! (in theory)
+				changeUser(params[1]);
+			} else {
+				//user is undefined
+				globalData.audioAwaitingOutput = "Sorry, the user was not found in the image database";
+			}
+		}
+	});
+	testPy.end(() => {
+		console.log("Closing Camera Session");
+	});
+}
+
+/*
 	### Utility Methods ###
 */
 /*
@@ -272,4 +310,10 @@ function sendLightSignal(signalKey) {
 			console.log('Trying to send light signal with unknown code, code: ' + signalKey.toLowerCase());
 			break;
 	}
+}
+
+function changeUser(user) {
+	let content = JSON.parse(fs.readFileSync('./userData.json'));
+	globalData.activeUser = content.users.indexOf(user.toLowerCase()) != -1 ? user : "default";
+	globalData.audioAwaitingOutput = "switching user to " + globalData.activeUser;
 }

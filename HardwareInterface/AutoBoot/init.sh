@@ -8,6 +8,7 @@ echo "Booting browser..."
 python stall.py
 lxterminal --command bash voiceInit.sh
 
-lxterminal --command chromium-browser --kiosk http://localhost:3000/nav/main
+#open chromium incognito to avoid "restore session" popup
+lxterminal --command chromium-browser --kiosk --incognito http://localhost:3000/nav/main
 
 bash

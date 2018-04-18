@@ -23,7 +23,7 @@ from websocket import create_connection
 ###TODO: implement motion stuffs
 
 config = {
-    "shouldSpeak": False,
+    "shouldSpeak": True,
     "shouldTriggerVisualIndicator": False, #WTH does this do rn
     "wsPort": "8080",
     "wsRequestStrings": {

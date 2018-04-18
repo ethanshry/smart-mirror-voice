@@ -1,0 +1,49 @@
+How to host a web server locally with NodeJS, Express, and Pug
+
+Sometimes you want to make use of web technologies like html/css, javascript, 
+and easy integration with web services, but don't want to have to deal with establishing permanent web servers.
+This tutorial will show you how to easily run a web server locally on your Raspberry Pi or Laptop,
+making use of NodeJS so we can use javascript both server-side and client side, as well as some of the 
+features unique to node like modular javascript and view routing and templating with ExpressJs and Pug.
+
+Aside: About Node
+
+NodeJS is designed around the idea of packages. There packages are essentialy just javascript code which you can install and make use of. Express is a package for url routing.
+Request is a package for HTTP requests. Pug is a package for HTML templating. There are literally thousands of packages for thousands of different use cases, from
+websockets and serial communication to utility packages for javascritp data structure transformations.
+
+The two main components of a node app are its package.json file and its app.js file. The package.json lists information about the app, like creator and package name, as well as
+what scripts are used to run the app and what packages must be installed for the app to be run.
+The app.js is the entrypoint into the app, and is where we will put our server initalization code.
+
+Step 1: Installation
+
+First we need to install node and npm. Go to HERE and install the latest stable build of Node. Make sure
+that you add Node/NPM to PATH if it asks during installation.
+
+Step 2: Node Setup
+
+The best way to work with node is through the command line. Open up your terminal and cd into an empty folder you want to start your node project in.
+If you don't know anything about the terminal, all you need to know is how to use the command "cd", look it up.
+
+Then you'll begin your new project. You'll want to type `npm init` and fill out the fields when prompted. You can leave most fields empty,
+but you should name your package, and set your entry point to "app.js". After youve finished with the promts, you'll want to go into your package.json
+file and add an item to the "scripts" object as follows: "start" : "node app.js"
+
+Finally, you'll want to create an empty file and name it "app.js" in the same directory as the "package.json" file you just created.
+
+
+Step 3: app.js
+
+Now we'll get into setting up the node server. First, from the command line we want to install a few useful packages.
+With your command line's current directory the same as the directory containing the 'package.json' file, you'll want to
+type the following:
+
+
+Step 4: View Routing with ExpressJS
+
+Step 5: Running the server
+
+(Optional) Step 6: NPM Modules
+
+(Optional) Step 7: View Templating with Pug

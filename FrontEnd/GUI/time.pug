@@ -16,7 +16,11 @@ Time
             var date = new Date();
             document.getElementById("dayOfWeek").innerHTML = days[date.getDay()];
             document.getElementById("month").innerHTML = date.getDate() + ' ' +  months[date.getMonth()] + ', ' + date.getFullYear();
-            document.getElementById("time").innerHTML = date.getHours() + ':' + date.getMinutes();
+            document.getElementById("time").innerHTML = date.getHours() + ':' + enforceTwo(date.getMinutes());
+        }
+
+        function enforceTwo(param) {
+            return param.length == 1 ? "0" + param : param;
         }
         // update time less than every second to account for inconsistencies w/ setInterval
         setInterval(updateTime,950);

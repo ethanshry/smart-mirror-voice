@@ -1,1 +1,81 @@
-{"users":{"ethan":{"importantStocks":["MSFT","TSLA","AMZN","GOOGL","AAPL","TWTR"],"hotwords":["jason","clara","susan"],"rememberedItems":["to take out the trash","buy fishing gear","eat fish tonight","to wear pants tomorrow","to buy milk"],"colorProfile":{"main":"#0000FF","accent1":"#FF00FF","accent2":"#bb00FF"}},"tony":{"importantStocks":["WMT","GE","PG","GOOGL","AAPL","TWTR"],"hotwords":["tina","simon","leroy"],"rememberedItems":["new phone who dis","rabbit rabbit","buy the fruitcake","eat the fruitcake","be the fruitcake"],"colorProfile":{"main":"#0000FF","accent1":"#FF00FF","accent2":"#bb00FF"}},"kevin":{}}}
+{
+    "users": {
+        "default": {
+            "importantStocks": [
+                "MSFT",
+                "TSLA",
+                "AMZN",
+                "GOOGL",
+                "AAPL",
+                "TWTR"
+            ],
+            "hotwords": [
+                "jack",
+                "jim",
+                "jill"
+            ],
+            "rememberedItems": [
+                "do the mirror demo"
+            ],
+            "colorProfile": {
+                "main": "#0000FF",
+                "accent1": "#FF00FF",
+                "accent2": "#bb00FF"
+            }
+        },
+        "ethan": {
+            "importantStocks": [
+                "MSFT",
+                "TSLA",
+                "AMZN",
+                "GOOGL",
+                "AAPL",
+                "TWTR"
+            ],
+            "hotwords": [
+                "jason",
+                "clara",
+                "susan"
+            ],
+            "rememberedItems": [
+                "to take out the trash",
+                "buy fishing gear",
+                "eat fish tonight",
+                "to wear pants tomorrow",
+                "to buy milk"
+            ],
+            "colorProfile": {
+                "main": "#0000FF",
+                "accent1": "#FF00FF",
+                "accent2": "#bb00FF"
+            }
+        },
+        "tony": {
+            "importantStocks": [
+                "WMT",
+                "GE",
+                "PG",
+                "GOOGL",
+                "AAPL",
+                "TWTR"
+            ],
+            "hotwords": [
+                "tina",
+                "simon",
+                "leroy"
+            ],
+            "rememberedItems": [
+                "new phone who dis",
+                "rabbit rabbit",
+                "buy the fruitcake",
+                "eat the fruitcake",
+                "be the fruitcake"
+            ],
+            "colorProfile": {
+                "main": "#0000FF",
+                "accent1": "#FF00FF",
+                "accent2": "#bb00FF"
+            }
+        }
+    }
+}

@@ -574,6 +574,23 @@ module.exports = {
                 }    
             },
             viewName: "textDisplay"
-        }
+        },
+        //Switch User
+        // DONE, UNTESTED
+        // ###V2TODO
+        {
+            name: "request switch user",
+            cmdStrings: ["change user", "switch user"],
+            keywords: [],
+            trigger: (param, activeUser) => {
+                return {
+                    params: {
+                        text: "Okay! I will take a photo to see if you match any known users",
+                        hardware: "switchUser"
+                    }
+                }
+            },
+            viewName: "textDisplay"
+        },
     ]
 };

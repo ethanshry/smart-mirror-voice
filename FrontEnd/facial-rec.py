@@ -1,3 +1,4 @@
+#pylint: disable=e0401
 import boto3
 import picamera as picam
 import sys
@@ -7,6 +8,7 @@ import sys
 #SECRET KEY:
 #/JOZY765qv02xVM4BRS+wnbfoQbx654m+I1hVyF4r
 
+message = []
 
 cam = picam.PiCamera()
 
@@ -67,7 +69,7 @@ def compare_faces(bucket, key, bucket_target, key_target, threshold=0, region="u
 for face in detect_face(BUCKET, KEY_TARGET):
     conf = face['Confidence']
     if(conf >= MIN_SIM):
-        print "Face detected"
+        message.append("faceDetected:true")
         IS_FACE = True
         
         
@@ -77,15 +79,21 @@ if(IS_FACE == True) :
        source_face, matches = compare_faces(BUCKET, FILENAME, BUCKET, KEY_TARGET)
        for match in matches:
           sim = match['Similarity']
-          print sim
+          print(sim)
+          message.append("simScore:" + sim)
           if (sim >= MIN_SIM) :
-             print("User is " + face)
+             message.append("user:" + face)
+             #print("User is " + face)
              RECOGNIZED_FACE = True
 
 if (RECOGNIZED_FACE == False):
-   print("This face is not in the current registry")
+   #print("This face is not in the current registry")
+   message.append("user:undefined")
 else:
-    print("No face detected")
+    #print("No face detected")
+    message.append("faceDetected:false")
+
+print(str.join(',', message))
 
 # the main source face
 #print "Source Face ({Confidence}%)".format(**source_face)

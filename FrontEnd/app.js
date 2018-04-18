@@ -165,6 +165,11 @@ app.get('/', (req,res) => {
 	res.render("main");
 });
 
+app.get('/tst/:num', (req,res) => {
+	sp.write(req.params.num)
+	res.render("error");
+});
+
 // main route for all voice commands
 app.get('/nav/:cmd', (req, res) => {
 	console.log('naving');

@@ -217,7 +217,7 @@ app.get('/nav/:cmd', (req, res) => {
 	### Serial Communication ###
 */
 
-let sp = new SerialPort("/dev/ttyAMA0", {
+let sp = new SerialPort("/dev/ttyUSB0", {
 	baudRate: 115200
 });
 
@@ -272,7 +272,10 @@ function checkForUserThroughFacialRecognition() {
 		console.log('Recieving Rekognition Data: ' + msg);
 		let dataPoints = msg.split(',');
 		for (let i = 0; i < dataPoints.length; i++) {
-			let params = dataPoints[0].split(':');
+			let params = dataPoints[i].split(':');
+			console.log(params);
+			console.log(params[0] == "user");
+			console.log(params[1] != "undefined");
 			if (params[0] == "faceDetected" && params[1] == "false") {
 				// no face detected, should say so
 				globalData.audioAwaitingOutput = "Sorry, we could not detect a face in view of the camera";
@@ -331,7 +334,11 @@ function sendLightSignal(signalKey) {
 }
 
 function changeUser(user) {
+	console.log("Changing user to: " + user);
 	let content = JSON.parse(fs.readFileSync('./userData.json'));
-	globalData.activeUser = content.users.indexOf(user.toLowerCase()) != -1 ? user : "default";
+	globalData.activeUser = user.toLowerCase() in content.users ? user : "default";
 	globalData.audioAwaitingOutput = "switching user to " + globalData.activeUser;
+	console.log("User changed to: " + globalData.activeUser);
 }
+
+changeUser("Ethan");

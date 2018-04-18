@@ -241,7 +241,8 @@ sp.on("data", (data) => {
 	globalData.serialACK = 1;
 });
 
-//sp.send("0");
+//ititialize leds to blank
+sp.write("0");
 
 // USED TO WRITE TO SERIAL WITH PARAMS ONLY
 // Note we expect "ACK" back from sending the mode and "K" back from each parameter, but we don't care that much so we're not going to check this

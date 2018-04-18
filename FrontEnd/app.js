@@ -177,6 +177,7 @@ app.get('/nav/:cmd', (req, res) => {
 	} else {
 		let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param, globalData.activeUser);
 		console.log(paramData);
+		console.log("hardware" in paramData);
 		// let p = new Promise();
 		if (paramData instanceof Promise) {
 			console.log('in the promise');

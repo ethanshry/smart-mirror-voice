@@ -20,7 +20,7 @@ Time
         }
 
         function enforceTwo(param) {
-            return param.length == 1 ? "0" + param : param;
+            return param.toString().length != 2 ? "0" + param : param;
         }
         // update time less than every second to account for inconsistencies w/ setInterval
         setInterval(updateTime,950);

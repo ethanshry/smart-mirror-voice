@@ -37,6 +37,22 @@ app.set("views", path.resolve(__dirname,'GUI'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+function testPy() {
+	let PythonShell = require('python-shell');
+	let testPy = new PythonShell('./test.py');
+	console.log('3');
+	testPy.on('message', (msg) => {
+		console.log('4');
+		console.log('Recieving Rekognition Data: ' + msg);
+	});
+	testPy.end(() => {
+		console.log('5');
+		console.log("Closing Camera Session");
+	});
+}
+
+testPy();
+
 // global content store
 const globalData = {
 	activeUser: "default",

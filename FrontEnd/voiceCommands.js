@@ -275,7 +275,7 @@ module.exports = {
                 return {
                     params: {
                         duration: duration,
-                        text: "timer set for " + param,
+                        text: "timer set for " + duration + " seconds",
                         "audioOptions": {
                             shouldOutput: true,
                             property: "text"

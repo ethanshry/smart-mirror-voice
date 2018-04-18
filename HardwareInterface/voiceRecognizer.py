@@ -102,25 +102,20 @@ def isActiveCheck():
         config["mirrorIsActive"] = True
 
 def main():
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(31, GPIO.OUT)
     global config
     recognizer = aiy.cloudspeech.get_recognizer()
     #recognizer.expect_phrase('turn off the light')
     #recognizer.expect_hotword('Clara')
     aiy.audio.get_recorder().start()
     # Visual indicator for kiosk testing
-    GPIO.output(31, GPIO.HIGH)
-    time.sleep(.2)
-    GPIO.output(31, GPIO.LOW)
-    time.sleep(.2)
-    GPIO.output(31, GPIO.HIGH)
-    time.sleep(.2)
-    GPIO.output(31, GPIO.LOW)
-    time.sleep(.2)
-    GPIO.output(31, GPIO.HIGH)
-    time.sleep(.2)
-    GPIO.output(31, GPIO.LOW)
+    isConn = False;
+    while not isConn:
+        try:
+            create_connection("ws://localhost:" + config["wsPort"] + "/websocket")
+            isConn = True
+        except:
+            print("failed")
+    
     while True:
         print('Listening...')
         text = ""
@@ -138,11 +133,9 @@ def main():
                 text = recognizer.recognize()
         # hotword detected, moving on
         # Visual indicator for kiosk testing
-        GPIO.output(31, GPIO.HIGH)
         sendWsMesage(formatOutgoingWsMsg(config["wsRequestStrings"]["light"],"hotwordtriggered"))
         text = recognizer.recognize()
         # Visual indicator for kiosk testing
-        GPIO.output(31, GPIO.LOW)
         if not text:
             print('Sorry, I did not hear you.')
             sendWsMesage(formatOutgoingWsMsg(config["wsRequestStrings"]["light"],"clear"))

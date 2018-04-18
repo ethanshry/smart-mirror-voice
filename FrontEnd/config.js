@@ -10,7 +10,7 @@
 module.exports = {
     guiServerPort: 3000,
     websocketServerPort: 8080,
-    shouldGiveVerbalResponse: false,
+    shouldGiveVerbalResponse: true,
     setCommandTimeout: undefined,
     APIKeys: {
         openweathermap: "",

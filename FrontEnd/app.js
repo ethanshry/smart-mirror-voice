@@ -241,7 +241,7 @@ sp.on("data", (data) => {
 });
 
 //ititialize leds to blank
-sp.write("0");
+sendLightSignal("clear");
 
 // USED TO WRITE TO SERIAL WITH PARAMS ONLY
 // Note we expect "ACK" back from sending the mode and "K" back from each parameter, but we don't care that much so we're not going to check this
@@ -312,6 +312,8 @@ function checkForUserThroughFacialRecognition() {
 			9 = Spiral Blue
 			10 = Spiral Red
 			11 = Spiral Green
+			12 = random breathe color
+			13 = random spiral color
 	params are: r,g,b,frame delay
 */
 
@@ -321,10 +323,10 @@ function sendLightSignal(signalKey) {
 			sp.write("0");
 			break;
 		case 'hotwordtriggered':
-			sp.write("9");
+			sp.write("13");
 			break;
 		case 'thinking':
-			sp.write("6");
+			sp.write("12");
 			break;
 		default:
 			// confused signal

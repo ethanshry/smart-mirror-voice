@@ -1,9 +1,20 @@
 mixin stylePackage
 
     link(href="https://fonts.googleapis.com/css?family=Comfortaa|Dosis|Montserrat|Raleway" rel="stylesheet")
+    link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/typicons/2.0.9/typicons.min.css')
     // note comfortaa is font-family: 'Comfortaa', cursive;
     // all others sans-serif
     style.
+        @font-face {
+            font-family: 'typicons';
+            src: url("https://cdnjs.cloudflare.com/ajax/libs/typicons/2.0.9/typicons.eot");
+            src: url("https://cdnjs.cloudflare.com/ajax/libs/typicons/2.0.9/typicons.eot?#iefix") format('embedded-opentype'),
+                url("https://cdnjs.cloudflare.com/ajax/libs/typicons/2.0.9/typicons.woff") format('woff'),
+                url("https://cdnjs.cloudflare.com/ajax/libs/typicons/2.0.9/typicons.ttf") format('truetype'),
+                url("https://cdnjs.cloudflare.com/ajax/libs/typicons/2.0.9/typicons.svg#typicons") format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
         body {
             color: white;
             background-color: black;

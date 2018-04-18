@@ -21,7 +21,41 @@ Main
                             span #{item}, 
                         else
                             span and #{item}
+            div.row
+                div#icon1
+                    span
+                div#icon2
+                    span
+                div#icon3
+                    span
+                div#icon4
+                    span
+                div#icon5
+                    span
             
+    script.
+        let icons = [document.querySelector('#icon1>span'),document.querySelector('#icon2>span'),document.querySelector('#icon3>span'),document.querySelector('#icon4>span'),document.querySelector('#icon5>span')];
+        let possIcons = ['social-twitter','edit','stopwatch','time','zoom','volume-up','microphone-outline','chart-line','camera-outline','weather-partly-sunny'];
+        let lastRand = undefined;
+        /*while (true) {
+            performSwitch();
+        }*/
+        let currentIcon = null;
+
+        setInterval(() => {
+            let rand = null;
+            while (rand == lastRand) {
+                rand = Math.floor(Math.random() * 5);
+            }
+            lastRand = rand;
+            currentIcon = icons[rand];
+            currentIcon.classList.add('fadeOut');
+            setTimeout(() => {
+                let rnd = Math.floor(Math.random() * possIcons.length);
+                currentIcon.classList = "typcn typcn-" + possIcons[rnd] + " fadeIn";
+            }, 1000);
+        }, 2500);
+
     style.
         .topPanelWrapper {
             display: flex;
@@ -42,6 +76,27 @@ Main
             font-size: 4em;
             text-align: center;
             margin-top: 20%;
+        }
+        .row {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            margin: 40px;
+            font-size: 5em;
+        }
+
+        .row.time {
+            justify-content: flex-end;
+        }
+
+        .fadeIn {
+            transition: opacity 1s;
+            opacity: 1;
+        }
+
+        .fadeOut {
+            transition: opacity 1s;
+            opacity: 0;
         }
 
     +socketScript()

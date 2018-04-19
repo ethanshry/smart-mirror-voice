@@ -223,7 +223,7 @@ app.get('/nav/:cmd', (req, res) => {
 	### Serial Communication ###
 */
 
-let sp = new SerialPort("/dev/ttyUSB0", {
+let sp = new SerialPort("/dev/ttyACM0", {
 	baudRate: 115200
 });
 

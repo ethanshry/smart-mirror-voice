@@ -576,8 +576,7 @@ module.exports = {
             viewName: "textDisplay"
         },
         //Switch User
-        // DONE, UNTESTED
-        // ###V2TODO
+        // DONE, GTG
         {
             name: "request switch user",
             cmdStrings: ["change user", "switch user"],
@@ -592,5 +591,38 @@ module.exports = {
             },
             viewName: "textDisplay"
         },
+        //Sound off
+        // DONE, GTG
+        {
+            name: "disable audio",
+            cmdStrings: ["no sound", "%$% sound off", "disable audio", "disable sound", "speaker off"],
+            keywords: [],
+            trigger: (param, activeUser) => {
+                return {
+                    params: {
+                        text: "Okay! I will turn off the speaker",
+                        hardware: "audioOff"
+                    }
+                }
+            },
+            viewName: "textDisplay"
+        },
+        //Sound on
+        // DONE, GTG
+        {
+            name: "enable audio",
+            cmdStrings: ["sound on", "%$% sound on", "enable audio", "speaker on", "%$% on speaker"],
+            keywords: [],
+            trigger: (param, activeUser) => {
+                return {
+                    params: {
+                        text: "Okay! I will turn on the speaker",
+                        hardware: "audioOn"
+                    }
+                }
+            },
+            viewName: "textDisplay"
+        },
+
     ]
 };

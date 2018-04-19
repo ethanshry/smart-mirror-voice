@@ -60,6 +60,7 @@ const globalData = {
 	shouldUpdateUser: true,
 	mirrorIsActive: true,
 	audioAwaitingOutput: "",
+	shouldOuputAudio: true,
 	serialACK: 0
 };
 
@@ -79,7 +80,7 @@ let wsServer = ws.createServer(function (conn) {
 		switch(newData.cmd) {
 			case 'audiooutrequest':
 				// audiooutrequest should return an audiooutresponse
-				if (globalData.audioAwaitingOutput != "") {
+				if (globalData.audioAwaitingOutput != "" && globalData.shouldOuputAudio) {
 					sendData(formatOutgoingWebsocketData('audiooutresponse', globalData.audioAwaitingOutput));
 					globalData.audioAwaitingOutput = "";
 				} else {
@@ -167,7 +168,7 @@ app.get('/', (req,res) => {
 
 app.get('/tst/:num', (req,res) => {
 	sp.write(req.params.num)
-	res.render("error");
+	res.render("error", {params: {text: req.params.num}});
 });
 
 // main route for all voice commands
@@ -178,17 +179,15 @@ app.get('/nav/:cmd', (req, res) => {
 	const commandData = CmdParser.getCommandForString(req.params.cmd);
 	console.log(commandData);
 	if (commandData.commandIndex == -1) {
-		res.render("error");
+		res.render("error", {params: {text: req.params.cmd}});
 	} else {
 		let paramData = voiceCommandLibrary.commands[commandData.commandIndex].trigger(commandData.param, globalData.activeUser);
 		console.log(paramData);
-		console.log("hardware" in paramData);
-		// let p = new Promise();
+		// so I don't think any promises are actually happening...idk man
 		if (paramData instanceof Promise) {
-			console.log('in the promise');
 			paramData.then((pData) => {
 				console.log(pData);
-				throw "Woahhhh chill";
+				throw "Don't promise if you can't follow through";
 				if ("error" in paramData) {
 					res.render('textDisplay', {params: { text: paramData.error}});
 				} else {
@@ -204,9 +203,11 @@ app.get('/nav/:cmd', (req, res) => {
 		} else if ("hardware" in paramData.params) {
 			if (paramData.params.hardware == "switchUser") {
 				checkForUserThroughFacialRecognition();
-			} /*else if (paramData["hardware"] == "activeStatus") {
-				checkForUserThroughFacialRecognition();
-			}*/
+			} else if (paramData.params.hardware == "audioOn") {
+				globalData.shouldOuputAudio = true;
+			} else if (paramData.params.hardware == "audioOff") {
+				globalData.shouldOuputAudio = false;
+			}
 			res.render(voiceCommandLibrary.commands[commandData.commandIndex].viewName, paramData);
 		} else {
 			if ("audioOptions" in paramData.params && paramData.params.audioOptions.shouldOutput) {

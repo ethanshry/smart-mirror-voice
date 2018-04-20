@@ -289,6 +289,7 @@ function checkForUserThroughFacialRecognition() {
 			if (params[0] == "faceDetected" && params[1] == "false") {
 				// no face detected, should say so
 				globalData.audioAwaitingOutput = "Sorry, we could not detect a face in view of the camera";
+				changeUser("default");
 			}
 			if (params[0] == "user" && params[1] != "undefined") {
 				// user is found! (in theory)
@@ -298,6 +299,7 @@ function checkForUserThroughFacialRecognition() {
 		}
 		// if we get to this point, no user was found
 		globalData.audioAwaitingOutput = "Sorry, the user was not found in the image database";
+		changeUser("default");
 	});
 	testPy.end(() => {
 		console.log("Closing Camera Session");

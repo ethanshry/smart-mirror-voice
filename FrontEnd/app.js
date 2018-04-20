@@ -247,7 +247,11 @@ sp.on("data", (data) => {
 });
 
 //ititialize leds to blank
-sendLightSignal("clear");
+setTimeout(() => {
+	sendLightSignal("clear");
+}, 3000)
+
+
 
 // USED TO WRITE TO SERIAL WITH PARAMS ONLY
 // Note we expect "ACK" back from sending the mode and "K" back from each parameter, but we don't care that much so we're not going to check this
@@ -346,6 +350,7 @@ function changeUser(user) {
 	let content = JSON.parse(fs.readFileSync('./userData.json'));
 	globalData.activeUser = user.toLowerCase() in content.users ? user.toLowerCase() : "default";
 	globalData.audioAwaitingOutput = "switching user to " + globalData.activeUser;
+	globalData.shouldUpdateUser = true;
 	console.log("User changed to: " + globalData.activeUser);
 }
 

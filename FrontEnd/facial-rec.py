@@ -15,7 +15,7 @@ cam.hflip = True
 cam.capture('unknownFace.jpg')
 
 BUCKET = "tech-reflect-voice-facial-images"
-FACE_LIST = ["Ethan","Anthony"]
+FACE_LIST = ["Ethan","Tony"]
 KEY_TARGET = "unknownFace.jpg"
 RECOGNIZED_FACE = False
 IS_FACE = False

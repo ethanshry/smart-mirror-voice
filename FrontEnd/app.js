@@ -36,7 +36,7 @@ app.set("views", path.resolve(__dirname,'GUI'));
 // Next two lines for abolity to grab Body from a POST request, possibly unneeded
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
-
+/*
 function testPy() {
 	let PythonShell = require('python-shell');
 	let testPy = new PythonShell('./test.py');
@@ -52,7 +52,7 @@ function testPy() {
 }
 
 testPy();
-
+*/
 // global content store
 const globalData = {
 	activeUser: "default",

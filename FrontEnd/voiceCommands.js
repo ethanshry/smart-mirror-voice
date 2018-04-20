@@ -257,12 +257,22 @@ module.exports = {
         // FIXAUTO
         {
             name: "timer",
-            cmdStrings: ["timer for %?%", "%$% timer for %?%"],
+            cmdStrings: ["%$% timer for %?%"],
             keywords: [],
             trigger: (param, activeUser) => {
                 // process timer
                 const cmdPiece = param.split(" ");
                 let duration = parseInt(cmdPiece[0]);
+                for (let i = 0; i < cmdPiece.legth - 1; i++) {
+                    console.log(parseInt(cmdPiece));
+                    if (Number.isInteger(parseInt(cmdPiece[i]))) {
+                        duration = parseInt(paramPiece[i])
+                        cmdPiece[1] = paramPiece[i+1]
+                        break;
+                    } 
+                }
+                console.log(cmdPiece);
+                console.log(duration);
                 if (cmdPiece[1] == "minutes" || cmdPiece[1] == "minute") {
                     duration *= 60;
                 } else if (cmdPiece[1] == "hours" || cmdPiece[1] == "hour") {
@@ -272,6 +282,7 @@ module.exports = {
                 } else {
                     duration = NaN;
                 }
+
                 return {
                     params: {
                         duration: duration,

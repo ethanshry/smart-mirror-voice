@@ -1,49 +1,192 @@
-How to host a web server locally with NodeJS, Express, and Pug
+= How to host a web server locally with NodeJS, Express, and Pug =
 
-Sometimes you want to make use of web technologies like html/css, javascript, 
-and easy integration with web services, but don't want to have to deal with establishing permanent web servers.
-This tutorial will show you how to easily run a web server locally on your Raspberry Pi or Laptop,
-making use of NodeJS so we can use javascript both server-side and client side, as well as some of the 
+Sometimes you want to make use of web technologies like html/css, javascript, and easy integration with web services, but don't want to have to deal with establishing permanent web servers.
+
+This tutorial will show you how to easily run a web server locally on your Raspberry Pi or Laptop, making use of NodeJS so we can use javascript both server-side and client side, as well as some of the 
 features unique to node like modular javascript and view routing and templating with ExpressJs and Pug.
 
-Aside: About Node
+== Aside: About Node ==
 
-NodeJS is designed around the idea of packages. There packages are essentialy just javascript code which you can install and make use of. Express is a package for url routing.
-Request is a package for HTTP requests. Pug is a package for HTML templating. There are literally thousands of packages for thousands of different use cases, from
+NodeJS is designed around the idea of packages. There packages are essentialy just javascript code which you can install and make use of.
+
+Express is a package for url routing.
+
+Request is a package for HTTP requests. 
+
+Pug is a package for HTML templating. 
+
+There are literally thousands of packages for thousands of different use cases, from
 websockets and serial communication to utility packages for javascritp data structure transformations.
 
-The two main components of a node app are its package.json file and its app.js file. The package.json lists information about the app, like creator and package name, as well as
-what scripts are used to run the app and what packages must be installed for the app to be run.
+The two main components of a node app are its package.json file and its app.js file. 
+
+The package.json lists information about the app, like creator and package name, as well as what scripts are used to run the app and what packages must be installed for the app to be run.
+
 The app.js is the entrypoint into the app, and is where we will put our server initalization code.
 
-Step 1: Installation
+== Step 1: Installation ==
 
-First we need to install node and npm. Go to HERE and install the latest stable build of Node. Make sure
-that you add Node/NPM to PATH if it asks during installation.
+First we need to install node and npm. Go to to [//https://nodejs.org/en/ Node] and install the latest stable build of Node. 
 
-Step 2: Node Setup
+Make sure that you add Node/NPM to PATH if it asks during installation.
+
+== Step 2: Node Setup ==
 
 The best way to work with node is through the command line. Open up your terminal and cd into an empty folder you want to start your node project in.
 If you don't know anything about the terminal, all you need to know is how to use the command "cd", look it up.
 
-Then you'll begin your new project. You'll want to type `npm init` and fill out the fields when prompted. You can leave most fields empty,
-but you should name your package, and set your entry point to "app.js". After youve finished with the promts, you'll want to go into your package.json
-file and add an item to the "scripts" object as follows: "start" : "node app.js"
+Then you'll begin your new project. You'll want to type '''npm init''' and fill out the fields when prompted. You can leave most fields empty, but you should name your package, and set your entry point to "app.js". 
 
-Finally, you'll want to create an empty file and name it "app.js" in the same directory as the "package.json" file you just created.
+After you've finished with the prompts, you'll want to go into your package.json file and add an item to the "scripts" object as follows: "start" : "node app.js". 
+
+When you're done, it should look something like this:
+
+    {
+        "name": "pkgName",
+        "version": "1.0.0",
+        "description": "package description",
+        "main": "app.js",
+        "scripts": {
+            "start": "node app.js"
+        },
+        "author": "authorName",
+        "license": "ISC",
+    }
+
+Finally, you'll want to create an empty file and name it '''app.js''' in the same directory as the '''package.json''' file you just created.
+
+== Step 3: app.js ==
+
+Now we'll get into setting up the node server. 
+
+First, from the command line we want to install a few useful packages.
+
+With your command line's current directory the same as the directory containing the '''package.json''' file, you'll want to type the following:
+
+    npm install --save http
+    npm install --save express
+
+This will install two node packages- http is what we use to establish a server, and express is used to handle routing to and from out views.
+
+Then we'll instantiate our server as follows:
+
+    let express = require('express');
+    let app = express();
+    let server = require('http').createServer(app);
+    app.set("views", __dirname);
+    server.listen(3000, () => console.log('running on 3000'));
+
+Then in your console, simply run the command
+
+    npm start
+
+If everything worked, you should see "running on 3000" appear in the console window!
+
+== Step 4: View Routing with ExpressJS ==
+
+Now let's do some routing. A route is essentially what is called on your server when someone types in a specific url- for instance, google.com triggers a different function than google.com/images. 
+
+Express handles all sorts of different types of requests, but for now we will focus on GET requests. Add the following code to your '''app.js''' file:
+
+    // route for http://localhost:3000/
+    app.get('/', (req,res) => {
+	res.sendFile("index.html");
+    });
+
+Then create an index.html file in the same directory as your '''app.js''' folder and give it some content. 
+
+Restart your node server in the console (npm start) and navigate to the url: '''http://localhost:3000''' in any browser of your choice- your html page should appear!
+
+Routes can also handle parameters- for instance
+
+    // route for http://localhost:3000/user/any_string
+    app.get('/user/:username', (req,res) => {
+        //the any_string part of the url will be stored in req.params.username
+        // also note- this is all server-side javascript here
+        // you could do something like check to see if the username is valid,
+        // then return a different page based on their validity
+        // whatever floats your boat really
+	res.sendFile("index.html");
+    });
+
+Express is much more full-featured than simple GET requests- it can handle different request types, as well as HTML preprocessing- which we will get into soon. 
+
+Full doncumentation can be found on [//https://expressjs.com/ Express]
+
+== Step 6: NPM Modules ==
+
+The beauty of nodejs is that there are literally thousands of packages available for use to make your life as a developer easier.
+
+A simple '''npm install --save package_name''' is all it takes to add a package to your project.
+
+The full list of npm packages can be found on [//https://npmjs.com/ NPM].
+
+== Step 7: View Templating with Pug ==
+
+Sometimes it can be very useful to preprocess an html page on the server, where you are gaurenteed to have lots of computing bandwidth and then send the precompiled code to the client.
+
+This also allows you to do things like potentially writing much shorter html files much more easily- as you will see below.
+
+Suppose we have a database of items and their prices. These are stored in a SQL database, and we want to render them to the user.
+One option would be to use an AJAX request to pull the data from the SQL server from the client, and then using a script create the elements and add them to the client's page- however this is a terrible idea for a variety of reasons.
+
+I will show you how this is trivial (and much safer) with HTML preprocessing.
+
+First, install '''Pug''', our HTML preprocessor. Full documentation can be found [//https://pugjs.org/api/getting-started.html/ Pug Docs].
+
+    npm isntall --save Pug
+
+Then we will need to add a line to our '''app.js''' so that our express server knows to use pug as a preprocessor.
+
+above the app.set("views",__dirname), add:
+
+    app.set("view engine", "pug");
+
+Then add a route to our '''store''':
+
+    app.get('/store', (req,res) => {
+	// instead of actually execurint a sql query, this "items" object will stand in for our returned SQL data
+	let itemList = [
+            {
+                "name": "nails",
+                "price": "9.99"
+            },
+            {
+                "name": "bucket",
+                "price": "19.99"
+            },
+            {
+                "name": "wrench",
+                "price": "11.99"
+            }
+        ];
+        // this next line tells express to render "store.pug" with the parameters: {items: itemList} and then serve the resulting HTML to the client
+        res.render("store", {items: itemList});
+    });
+
+Next, you'll want to create a '''store.pug''' in the same directory as your '''app.js'''. It will look as follows:
+
+    div Welcome to the store!
+    div.items
+        for i in items
+            div #{i.name} sell for $#{i.price}
+
+Note that pug is like python- formatting is strict (i.e. make sure your tabs look like the example)
+
+Then restart your node server and navigate to '''http://localhost:3000/store'''. You should see the output of your work.
+
+If we view the page source, we will see that our pug code compiled to:
+
+    <div>Welcome to the store!</div>
+    <div class="items">
+        <div>nails sells for $9.99</div>
+        <div>bucket sells for $19.99</div>
+        <div>wrench sells for $11.99</div>
+    </div>
+
+This is obviously a rudimentary example, but you can imagine the work this would save someone who is trying to create a storefront with thousands of items by hand.
+
+Pug has loads more features and you should check out its syntax and features [//https://pugjs.org/api/getting-started.html/ Pug Docs]
 
 
-Step 3: app.js
-
-Now we'll get into setting up the node server. First, from the command line we want to install a few useful packages.
-With your command line's current directory the same as the directory containing the 'package.json' file, you'll want to
-type the following:
-
-
-Step 4: View Routing with ExpressJS
-
-Step 5: Running the server
-
-(Optional) Step 6: NPM Modules
-
-(Optional) Step 7: View Templating with Pug
+[[Category:HowTos]]
